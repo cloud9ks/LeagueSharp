@@ -279,6 +279,7 @@ namespace CassioXD
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
+                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Einstellung.AddToMainMenu();
             }
@@ -587,7 +588,9 @@ namespace CassioXD
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0)
+            var BlockR = Einstellung.Item("BlockR").GetValue<bool>();
+
+            if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0 && BlockR)
                     args.Process = false;
         }
 
