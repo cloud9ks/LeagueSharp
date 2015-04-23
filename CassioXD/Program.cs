@@ -237,16 +237,18 @@ namespace CassioXD
         private static Obj_AI_Hero GetRFaceTarget()
         {
             var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
-
             foreach (var target in Targets)
             {
-                foreach (var fenemy in FaceEnemy)
-                {
-                    if (target == fenemy)
-                        return target;
-                }
+                if (target != null && target.IsVisible && !target.IsDead)
+                    foreach (var fenemy in FaceEnemy)
+                        if (fenemy != null && fenemy.IsVisible && !fenemy.IsDead)
+                        {
+                            if (target.BaseSkinName == fenemy.BaseSkinName)
+                                return fenemy;
+                        }
             }
             return null;
+
         }
 
         private static Obj_AI_Hero GetRTarget()
@@ -255,10 +257,12 @@ namespace CassioXD
 
             foreach (var target in Targets)
             {
+                if (target != null && target.IsVisible && !target.IsDead)
                 foreach (var enemy in Enemy)
+                    if (enemy != null && enemy.IsVisible && !enemy.IsDead)
                 {
-                    if (target == enemy)
-                        return target;
+                    if (target.BaseSkinName == enemy.BaseSkinName)
+                        return enemy;
                 }
             }
             return null;
@@ -277,6 +281,7 @@ namespace CassioXD
                 Game.OnUpdate += OnTick;
                 Drawing.OnDraw += OnDraw;
                 Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+                Game.OnWndProc += Game_OnWndProc;
 
                 Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 
@@ -308,6 +313,7 @@ namespace CassioXD
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
+                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Fun", "Fun").SetValue(true));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("DrawList", "DrawList").SetValue(true));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("DrawPrediction", "DrawPrediction").SetValue(true));
@@ -413,7 +419,6 @@ namespace CassioXD
 
             var menuItem2 = Einstellung.Item("Hitchance").GetValue<StringList>();
             Enum.TryParse(menuItem2.SList[menuItem2.SelectedIndex], out Chance);
-
             if (E.IsReady() && GetETarget() != null)
             {
                 E.Cast(GetETarget());
@@ -590,16 +595,34 @@ namespace CassioXD
 
         }
 
+        static void Game_OnWndProc(WndEventArgs args)
+        {
+            if (MenuGUI.IsChatOpen)
+                return;
+
+            var AssistedUltKey = Einstellung.Item("AssistedUltKey").GetValue<KeyBind>().Key;
+
+            if (args.WParam == AssistedUltKey)
+            {
+                args.Process = false;
+                CastAssistedUlt();
+            }
+        }
+
         public static void CastAssistedUlt()
         { 
             var faceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
             var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
-                
-            if (faceEnemy.Count() >= 1)
+            
+            if (faceEnemy.Count() >= 1 && GetRFaceTarget() != null)
+            {
                 R.Cast(R.GetPrediction(GetRFaceTarget(), true).CastPosition);
+            }
             else
-            if (Enemy.Count >= 1)
-                R.Cast(R.GetPrediction(GetRTarget(), true).CastPosition);
+                if (Enemy.Count >= 1 && GetRTarget() != null)
+                {
+                    R.Cast(R.GetPrediction(GetRTarget(), true).CastPosition);
+                }
         }
 
         public static Tuple<int, List<Obj_AI_Hero>> GetHits(Spell spell)
@@ -611,11 +634,8 @@ namespace CassioXD
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R)
-                if (GetHits(R).Item1 == 0)
+            if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0)
                     args.Process = false;
-                else
-                    CastAssistedUlt();
         }
 
         private static void OnDraw(EventArgs args)
@@ -627,8 +647,6 @@ namespace CassioXD
 
                 var DrawList = Einstellung.Item("DrawList").GetValue<bool>();
                 var DrawPrediction = Einstellung.Item("DrawPrediction").GetValue<bool>();
-
-                Drawing.DrawText(200.0f, 190.0f - 10, System.Drawing.Color.White, GetHits(R).Item1.ToString());
 
                 if (DrawList)
                 {
