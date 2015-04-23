@@ -25,6 +25,7 @@ namespace CassioXD
         public static AimMode AMode = AimMode.Normal;
         public static HitChance Chance = HitChance.VeryHigh;
         public static bool listed = true;
+        public static bool Nopsntarget = true;
         public static bool aastatus;
 
 
@@ -353,7 +354,7 @@ namespace CassioXD
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7))
+                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget)
                 {
                     args.Process = true;
                     aastatus = true;
@@ -467,6 +468,11 @@ namespace CassioXD
             var rangedMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
             var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
             var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+
+            if (allMinionsQ.Count() == 0)
+                Nopsntarget = true;
+            else
+                Nopsntarget = false;
 
             if (Q.IsReady())
             {
