@@ -354,7 +354,7 @@ namespace CassioXD
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget)
+                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget || Player.HasBuffOfType(BuffType.Silence))
                 {
                     args.Process = true;
                     aastatus = true;
