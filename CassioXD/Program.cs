@@ -246,6 +246,8 @@ namespace CassioXD
 
                 Game.OnUpdate += OnTick;
                 Drawing.OnDraw += OnDraw;
+                Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+
                 Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 
                 Targetlist(TargetingMode.AutoPriority);
@@ -556,6 +558,29 @@ namespace CassioXD
                 }
             }
 
+        }
+
+        public static Tuple<int, List<Obj_AI_Hero>> GetHits(Spell spell)
+        {
+            var hits = new List<Obj_AI_Hero>();
+            var range = spell.Range * spell.Range;
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget() && Player.ServerPosition.Distance(h.ServerPosition, true) < range))
+            {
+                if (spell.WillHit(enemy, Player.ServerPosition) && Player.ServerPosition.Distance(enemy.ServerPosition, true) < spell.Width * spell.Width)
+                {
+                    hits.Add(enemy);
+                }
+            }
+            return new Tuple<int, List<Obj_AI_Hero>>(hits.Count, hits);
+        }
+
+        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+
+            if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0)
+            {
+                args.Process = false;
+            }
         }
 
         private static void OnDraw(EventArgs args)
