@@ -149,7 +149,7 @@ namespace CassioXD
                 {
                     Targets.Add(enemy);
                 }
-
+                
 
                 for (i1 = 0; i1 < Targets.Count; i1++)
                     for (i2 = 0; i2 < Targets.Count; i2++)
@@ -232,6 +232,36 @@ namespace CassioXD
             }
             return null;
 
+        }
+
+        private static Obj_AI_Hero GetRFaceTarget()
+        {
+            var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+
+            foreach (var target in Targets)
+            {
+                foreach (var fenemy in FaceEnemy)
+                {
+                    if (target == fenemy)
+                        return target;
+                }
+            }
+            return null;
+        }
+
+        private static Obj_AI_Hero GetRTarget()
+        {
+            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+
+            foreach (var target in Targets)
+            {
+                foreach (var enemy in Enemy)
+                {
+                    if (target == enemy)
+                        return target;
+                }
+            }
+            return null;
         }
 
 
@@ -560,27 +590,32 @@ namespace CassioXD
 
         }
 
+        public static void CastAssistedUlt()
+        { 
+            var faceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+                
+            if (faceEnemy.Count() >= 1)
+                R.Cast(R.GetPrediction(GetRFaceTarget(), true).CastPosition);
+            else
+            if (Enemy.Count >= 1)
+                R.Cast(R.GetPrediction(GetRTarget(), true).CastPosition);
+        }
+
         public static Tuple<int, List<Obj_AI_Hero>> GetHits(Spell spell)
         {
-            var hits = new List<Obj_AI_Hero>();
-            var range = spell.Range * spell.Range;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget() && Player.ServerPosition.Distance(h.ServerPosition, true) < range))
-            {
-                if (spell.WillHit(enemy, Player.ServerPosition) && Player.ServerPosition.Distance(enemy.ServerPosition, true) < spell.Width * spell.Width)
-                {
-                    hits.Add(enemy);
-                }
-            }
-            return new Tuple<int, List<Obj_AI_Hero>>(hits.Count, hits);
+            var GetenemysHit = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && spell.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+
+            return new Tuple<int, List<Obj_AI_Hero>>(GetenemysHit.Count, GetenemysHit);
         }
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-
-            if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0)
-            {
-                args.Process = false;
-            }
+            if (args.Slot == SpellSlot.R)
+                if (GetHits(R).Item1 == 0)
+                    args.Process = false;
+                else
+                    CastAssistedUlt();
         }
 
         private static void OnDraw(EventArgs args)
@@ -593,12 +628,14 @@ namespace CassioXD
                 var DrawList = Einstellung.Item("DrawList").GetValue<bool>();
                 var DrawPrediction = Einstellung.Item("DrawPrediction").GetValue<bool>();
 
+                Drawing.DrawText(200.0f, 190.0f - 10, System.Drawing.Color.White, GetHits(R).Item1.ToString());
 
                 if (DrawList)
                 {
                     Drawing.DrawText(100.0f, 100.0f - 10, System.Drawing.Color.White, "Targetlist:");
                     for (i = 0; i < Targets.Count; i++)
                     {
+
                         if (GetQTarget() != null && GetQTarget().BaseSkinName == Targets[i].BaseSkinName)
                             Drawing.DrawText(100.0f, 100.0f + (i * 10), System.Drawing.Color.Green, "{0}.Target: {1}", (i + 1), Targets[i].BaseSkinName);
                         else
