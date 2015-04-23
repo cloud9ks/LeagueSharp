@@ -464,10 +464,10 @@ namespace CassioXD
         {
             if (!Orbwalking.CanMove(40)) return;
 
-            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + Q.Delay || ((Q.GetDamage(x) / 3) + 20) > x.Health || ((Q.GetDamage(x) / 3)) < x.Health).ToList();
-            var rangedMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + Q.Delay || ((Q.GetDamage(x) / 3) + 20) > x.Health || ((Q.GetDamage(x) / 3)) < x.Health).ToList();
-            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + W.Delay || (W.GetDamage(x) + 20) > x.Health || (W.GetDamage(x)) < x.Health).ToList();
-            var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + W.Delay || (W.GetDamage(x) + 20) > x.Health || (W.GetDamage(x)) < x.Health).ToList();
+            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+            var rangedMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+            var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
 
             if (Q.IsReady())
             {
