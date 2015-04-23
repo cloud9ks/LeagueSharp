@@ -26,10 +26,6 @@ namespace CassioXD
         public static HitChance Chance = HitChance.VeryHigh;
         public static bool listed = true;
         public static bool aastatus;
-        public static int kills = 0;
-        public static Random rand = new Random();
-
-        public static List<string> Messages;
 
 
 
@@ -64,40 +60,10 @@ namespace CassioXD
             HitChance = 0
         }
 
-        static void setupMessages()
-        {
-            Messages = new List<string>
-            {
-                "gj", "good job", "very gj", "very good job",
-                "wp", "well played",
-                "nicely played",
-                "amazing",
-                "nice", "nice1", "nice one",
-                "well done",
-                "sweet",                
-            };
-
-        }
-
-        static string getRandomElement(List<string> collection, bool firstEmpty = true)
-        {
-            if (firstEmpty && rand.Next(3) == 0)
-                return collection[0];
-
-            return collection[rand.Next(collection.Count)];
-        }
-
-        static string generateMessage()
-        {
-            string message = getRandomElement(Messages, false);
-            return message;
-        }
-
 
         static void Main(string[] args)
         {
             LeagueSharp.Common.CustomEvents.Game.OnGameLoad += onGameLoad;
-            setupMessages();
         }
 
         private static double FindPrioForTarget(Obj_AI_Hero enemy, TargetingMode TMode)
@@ -314,11 +280,7 @@ namespace CassioXD
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
                 Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Fun", "Fun").SetValue(true));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("DrawList", "DrawList").SetValue(true));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("DrawPrediction", "DrawPrediction").SetValue(true));
                 Einstellung.AddToMainMenu();
-
             }
             catch (Exception ex)
             {
@@ -334,16 +296,7 @@ namespace CassioXD
             {
                 var menuItem = Einstellung.Item("TargetingMode").GetValue<StringList>();
                 Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out TMode);
-
-                var Fun = Einstellung.Item("Fun").GetValue<bool>();
                 
-                foreach  (var enemy in Targets)
-                    if (enemy.IsValid && enemy.IsDead && Player.ChampionsKilled > kills && Fun)
-                    {
-                        kills = Player.ChampionsKilled;
-                        Game.Say("/all " + generateMessage() + " " + enemy.Name);
-                    }
-
                 switch (Orbwalker.ActiveMode)
                 {
                     case Orbwalking.OrbwalkingMode.Combo:
@@ -640,43 +593,9 @@ namespace CassioXD
 
         private static void OnDraw(EventArgs args)
         {
-            int i;
             try
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Khaki);
-
-                var DrawList = Einstellung.Item("DrawList").GetValue<bool>();
-                var DrawPrediction = Einstellung.Item("DrawPrediction").GetValue<bool>();
-
-                if (DrawList)
-                {
-                    Drawing.DrawText(100.0f, 100.0f - 10, System.Drawing.Color.White, "Targetlist:");
-                    for (i = 0; i < Targets.Count; i++)
-                    {
-
-                        if (GetQTarget() != null && GetQTarget().BaseSkinName == Targets[i].BaseSkinName)
-                            Drawing.DrawText(100.0f, 100.0f + (i * 10), System.Drawing.Color.Green, "{0}.Target: {1}", (i + 1), Targets[i].BaseSkinName);
-                        else
-                            Drawing.DrawText(100.0f, 100.0f + (i * 10), System.Drawing.Color.White, "{0}.Target: {1}", (i + 1), Targets[i].BaseSkinName);
-                    }
-                }
-                if (DrawPrediction)
-                {
-                    foreach (var target in Targets)
-                    {
-                        if (target.IsVisible && !target.IsDead)
-                        {
-                            if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
-                            {
-                                Render.Circle.DrawCircle(Q.GetPrediction(target, true).CastPosition, 75f, System.Drawing.Color.Aquamarine);
-                            }
-                            else
-                            {
-                                Render.Circle.DrawCircle(Q.GetPrediction(target, true).CastPosition, 75f, System.Drawing.Color.Red);
-                            }
-                        }
-                    }
-                }
             }
             catch (Exception ex)
             {
