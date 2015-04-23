@@ -361,7 +361,7 @@ namespace CassioXD
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                if ((Player.ManaPercentage() < 30) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7))
+                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7))
                 {
                     args.Process = true;
                     aastatus = true;
@@ -525,7 +525,7 @@ namespace CassioXD
                     var buffEndTime = GetPoisonBuffEndTime(minion);
                     if (buffEndTime > Game.Time + E.Delay)
                     {
-                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health || Player.ManaPercentage() > 30)
+                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health || Player.ManaPercentage() > 70)
                         {
                             E.Cast(minion);
                         }
@@ -538,50 +538,6 @@ namespace CassioXD
         public static void Freeze()
         {
             if (!Orbwalking.CanMove(40)) return;
-/*
-            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + Q.Delay && ((Q.GetDamage(x) / 3)*2 + E.GetDamage(x)) < x.Health && ((Q.GetDamage(x) / 3)) < x.Health).ToList();
-            var rangedMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + Q.Delay && ((Q.GetDamage(x) / 3)*2 + E.GetDamage(x)) < x.Health && ((Q.GetDamage(x) / 3)) < x.Health).ToList();
-            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + W.Delay && (W.GetDamage(x)*2 + E.GetDamage(x)) < x.Health && (W.GetDamage(x)) < x.Health).ToList();
-            var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) < Game.Time + W.Delay && (W.GetDamage(x)*2 + E.GetDamage(x)) < x.Health && (W.GetDamage(x)) < x.Health).ToList();
-
-            if (Q.IsReady())
-            {
-                var FLr = Q.GetCircularFarmLocation(rangedMinionsQ, Q.Width);
-                var FLa = Q.GetCircularFarmLocation(allMinionsQ, Q.Width);
-
-                if (FLr.MinionsHit >= 3 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
-                {
-                    Q.Cast(FLr.Position);
-                    dtLastQCast = Environment.TickCount;
-                    return;
-                }
-                else
-                    if (FLa.MinionsHit >= 2 || allMinionsQ.Count() == 1 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
-                    {
-                        Q.Cast(FLa.Position);
-                        dtLastQCast = Environment.TickCount;
-                        return;
-                    }
-            }
-
-            if (W.IsReady() && Environment.TickCount > dtLastQCast + Q.Delay * 1000)
-            {
-                var FLr = W.GetCircularFarmLocation(rangedMinionsW, W.Width);
-                var FLa = W.GetCircularFarmLocation(allMinionsW, W.Width);
-
-                if (FLr.MinionsHit >= 3 && Player.Distance(FLr.Position) < (W.Range + W.Width))
-                {
-                    W.Cast(FLr.Position);
-                    return;
-                }
-                else
-                    if (FLa.MinionsHit >= 2 || allMinionsW.Count() == 1 && Player.Distance(FLr.Position) < (W.Range + W.Width))
-                    {
-                        W.Cast(FLa.Position);
-                        return;
-                    }
-            }
-            */
 
             if (E.IsReady())
             {
@@ -592,7 +548,7 @@ namespace CassioXD
                     var buffEndTime = GetPoisonBuffEndTime(minion);
                     if (buffEndTime > Game.Time + E.Delay)
                     {
-                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health || Player.ManaPercentage() > 75)
+                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health)
                         {
                             E.Cast(minion);
                         }
