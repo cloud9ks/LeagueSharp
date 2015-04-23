@@ -397,7 +397,6 @@ namespace CassioXD
                 {
                     case AimMode.HitChance:
                         W.CastIfHitchanceEquals(GetWTarget(), Chance, false);
-                        dtLastQCast = Environment.TickCount;
                         break;
                     case AimMode.Normal:
                         W.Cast(GetWTarget(), false, true);
