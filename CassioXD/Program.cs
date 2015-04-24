@@ -287,7 +287,7 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
+                //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
@@ -350,7 +350,6 @@ namespace CassioXD
         }
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            var LaneClearMana = Option.Item("LaneClearMana").GetValue<int>();
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 if ((Player.Mana < E.Instance.ManaCost) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Player.HasBuffOfType(BuffType.Silence))
@@ -367,6 +366,7 @@ namespace CassioXD
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
+                LaneClearMana = Option.Item("LaneClearMana").GetValue<Slider>().Value;
                 if ((Player.ManaPercentage() < LaneClearMana) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget || Player.HasBuffOfType(BuffType.Silence))
                 {
                     args.Process = true;
@@ -482,9 +482,9 @@ namespace CassioXD
 
             var Qlaneclear = Option.Item("Qlaneclear").GetValue<bool>();
             var Wlaneclear = Option.Item("Wlaneclear").GetValue<bool>();
-            var LaneClearMana = Option.Item("LaneClearMana").GetValue<int>();
+            var LaneClearMana = Option.Item("LaneClearMana").GetValue<Slider>().Value;
 
-            if (allMinionsQ.Count() == 0)
+            if (allMinionsQ.Count() > 0)
                 Nopsntarget = true;
             else
                 Nopsntarget = false;
