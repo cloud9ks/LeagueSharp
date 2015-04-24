@@ -490,7 +490,7 @@ namespace CassioXD
                     }
             }
 
-            if (W.IsReady() && Environment.TickCount > dtLastQCast + Q.Delay * 1000)
+            if (W.IsReady() && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
             {
                 var FLr = W.GetCircularFarmLocation(rangedMinionsW, W.Width);
                 var FLa = W.GetCircularFarmLocation(allMinionsW, W.Width);
