@@ -11,7 +11,7 @@ namespace CassioXD
     class Program
     {
         public const string ChampionName  = "Cassiopeia";
-        public static Menu Einstellung;
+        public static Menu Option;
         public static Orbwalking.Orbwalker Orbwalker;
         public static Obj_AI_Hero Player;
         public static List<Spell> SpellList = new List<Spell>();
@@ -271,18 +271,20 @@ namespace CassioXD
                 SpellList.Add(E);
                 SpellList.Add(R);
 
-                Einstellung = new Menu("CassioXD", "CassioXD", true);
+                Option = new Menu("CassioXD", "CassioXD", true);
 
-                Einstellung.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-                Orbwalker = new Orbwalking.Orbwalker(Einstellung.SubMenu("Orbwalking"));
+                Option.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+                Orbwalker = new Orbwalking.Orbwalker(Option.SubMenu("Orbwalking"));
 
-                Einstellung.AddSubMenu(new Menu("Zucht", "Zucht"));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
-                Einstellung.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
-                Einstellung.AddToMainMenu();
+                Option.AddSubMenu(new Menu("Zucht", "Zucht"));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "Wlaneclear").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
+                Option.AddToMainMenu();
             }
             catch (Exception ex)
             {
@@ -296,7 +298,7 @@ namespace CassioXD
 
             try
             {
-                var menuItem = Einstellung.Item("TargetingMode").GetValue<StringList>();
+                var menuItem = Option.Item("TargetingMode").GetValue<StringList>();
                 Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out TMode);
                 
                 switch (Orbwalker.ActiveMode)
@@ -369,10 +371,10 @@ namespace CassioXD
 
         public static void Combo()
         {
-            var menuItem3 = Einstellung.Item("AimMode").GetValue<StringList>();
+            var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
             Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
 
-            var menuItem2 = Einstellung.Item("Hitchance").GetValue<StringList>();
+            var menuItem2 = Option.Item("Hitchance").GetValue<StringList>();
             Enum.TryParse(menuItem2.SList[menuItem2.SelectedIndex], out Chance);
             if (E.IsReady() && GetETarget() != null)
             {
@@ -408,10 +410,10 @@ namespace CassioXD
 
         public static void Harass()
         {
-            var menuItem3 = Einstellung.Item("AimMode").GetValue<StringList>();
+            var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
             Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
 
-            var menuItem2 = Einstellung.Item("Hitchance").GetValue<StringList>();
+            var menuItem2 = Option.Item("Hitchance").GetValue<StringList>();
             Enum.TryParse(menuItem2.SList[menuItem2.SelectedIndex], out Chance);
 
             if (E.IsReady() && GetETarget() != null)
@@ -467,6 +469,8 @@ namespace CassioXD
             var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
             var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
 
+            var Wlaneclear = Option.Item("Wlaneclear").GetValue<bool>();
+
             if (allMinionsQ.Count() == 0)
                 Nopsntarget = true;
             else
@@ -490,7 +494,7 @@ namespace CassioXD
                     }
             }
 
-            if (W.IsReady() && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
+            if (W.IsReady() && Wlaneclear && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
             {
                 var FLr = W.GetCircularFarmLocation(rangedMinionsW, W.Width);
                 var FLa = W.GetCircularFarmLocation(allMinionsW, W.Width);
@@ -555,7 +559,7 @@ namespace CassioXD
             if (MenuGUI.IsChatOpen)
                 return;
 
-            var AssistedUltKey = Einstellung.Item("AssistedUltKey").GetValue<KeyBind>().Key;
+            var AssistedUltKey = Option.Item("AssistedUltKey").GetValue<KeyBind>().Key;
 
             if (args.WParam == AssistedUltKey)
             {
@@ -589,7 +593,7 @@ namespace CassioXD
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            var BlockR = Einstellung.Item("BlockR").GetValue<bool>();
+            var BlockR = Option.Item("BlockR").GetValue<bool>();
 
             if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0 && BlockR)
                     args.Process = false;
@@ -599,8 +603,10 @@ namespace CassioXD
 
         private static void OnDraw(EventArgs args)
         {
+            var DrawQ = Option.Item("DrawQ").GetValue<bool>();
             try
             {
+                if (DrawQ)
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Khaki);
             }
             catch (Exception ex)
