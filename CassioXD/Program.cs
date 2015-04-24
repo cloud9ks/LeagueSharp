@@ -23,6 +23,7 @@ namespace CassioXD
         public static List<Obj_AI_Hero> Targets = new List<Obj_AI_Hero>();
         public static TargetingMode TMode = TargetingMode.FastKill;
         public static AimMode AMode = AimMode.Normal;
+        public static LaneClearMode LMode = LaneClearMode.Normal;
         public static HitChance Chance = HitChance.VeryHigh;
         public static bool listed = true;
         public static bool Nopsntarget = true;
@@ -59,6 +60,12 @@ namespace CassioXD
         {
             Normal = 1,
             HitChance = 0
+        }
+
+        public enum LaneClearMode
+        {
+            Normal = 1,
+            Logical = 0
         }
 
 
@@ -280,7 +287,10 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "Wlaneclear").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
@@ -340,6 +350,7 @@ namespace CassioXD
         }
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
+            var LaneClearMana = Option.Item("LaneClearMana").GetValue<int>();
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 if ((Player.Mana < E.Instance.ManaCost) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Player.HasBuffOfType(BuffType.Silence))
@@ -356,7 +367,7 @@ namespace CassioXD
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                if ((Player.ManaPercentage() < 70) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget || Player.HasBuffOfType(BuffType.Silence))
+                if ((Player.ManaPercentage() < LaneClearMana) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Nopsntarget || Player.HasBuffOfType(BuffType.Silence))
                 {
                     args.Process = true;
                     aastatus = true;
@@ -469,14 +480,16 @@ namespace CassioXD
             var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
             var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
 
+            var Qlaneclear = Option.Item("Qlaneclear").GetValue<bool>();
             var Wlaneclear = Option.Item("Wlaneclear").GetValue<bool>();
+            var LaneClearMana = Option.Item("LaneClearMana").GetValue<int>();
 
-            if (allMinionsQ.Count() == 0)
+            if (allMinionsQ.Count() > 0)
                 Nopsntarget = true;
             else
                 Nopsntarget = false;
 
-            if (Q.IsReady())
+            if (Q.IsReady() && Qlaneclear)
             {
                 var FLr = Q.GetCircularFarmLocation(rangedMinionsQ, Q.Width);
                 var FLa = Q.GetCircularFarmLocation(allMinionsQ, Q.Width);
@@ -521,7 +534,7 @@ namespace CassioXD
                     var buffEndTime = GetPoisonBuffEndTime(minion);
                     if (buffEndTime > Game.Time + E.Delay)
                     {
-                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health || Player.ManaPercentage() > 70)
+                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health || Player.ManaPercentage() > LaneClearMana)
                         {
                             E.Cast(minion);
                         }
