@@ -340,7 +340,7 @@ namespace CassioXD
         {
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if ((Player.Mana < E.Instance.ManaCost) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7))
+                if ((Player.Mana < E.Instance.ManaCost) || (E.Instance.Level == 0) || ((E.Instance.CooldownExpires - Game.ClockTime) > 0.7) || Player.HasBuffOfType(BuffType.Silence))
                 {
                     args.Process = true;
                     aastatus = true;
@@ -385,7 +385,6 @@ namespace CassioXD
                 { 
                     case AimMode.HitChance:
                         Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
-                        dtLastQCast = Environment.TickCount;
                         break;
                     case AimMode.Normal:
                         Q.Cast(GetQTarget(), false, true);
@@ -425,7 +424,6 @@ namespace CassioXD
                 {
                     case AimMode.HitChance:
                         Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
-                        dtLastQCast = Environment.TickCount;
                         break;
                     case AimMode.Normal:
                         Q.Cast(GetQTarget(), false, true);
@@ -482,14 +480,12 @@ namespace CassioXD
                 if (FLr.MinionsHit >= 3 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
                 {
                     Q.Cast(FLr.Position);
-                    dtLastQCast = Environment.TickCount;
                     return;
                 }
                 else
                     if (FLa.MinionsHit >= 2 || allMinionsQ.Count() == 1 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
                     {
                         Q.Cast(FLa.Position);
-                        dtLastQCast = Environment.TickCount;
                         return;
                     }
             }
@@ -597,12 +593,15 @@ namespace CassioXD
 
             if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0 && BlockR)
                     args.Process = false;
+            if (args.Slot == SpellSlot.Q)
+            dtLastQCast = Environment.TickCount;
         }
 
         private static void OnDraw(EventArgs args)
         {
             try
             {
+                Drawing.DrawText(100.0f, 100.0f - 10, System.Drawing.Color.White, Environment.TickCount.ToString() + " " + (dtLastQCast + Q.Delay * 1000).ToString());
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Khaki);
             }
             catch (Exception ex)
