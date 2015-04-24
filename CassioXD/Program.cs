@@ -484,7 +484,7 @@ namespace CassioXD
             var Wlaneclear = Option.Item("Wlaneclear").GetValue<bool>();
             var LaneClearMana = Option.Item("LaneClearMana").GetValue<int>();
 
-            if (allMinionsQ.Count() > 0)
+            if (allMinionsQ.Count() == 0)
                 Nopsntarget = true;
             else
                 Nopsntarget = false;
