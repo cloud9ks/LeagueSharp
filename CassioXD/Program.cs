@@ -601,7 +601,6 @@ namespace CassioXD
         {
             try
             {
-                Drawing.DrawText(100.0f, 100.0f - 10, System.Drawing.Color.White, Environment.TickCount.ToString() + " " + (dtLastQCast + Q.Delay * 1000).ToString());
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Khaki);
             }
             catch (Exception ex)
