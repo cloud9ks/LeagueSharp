@@ -475,24 +475,26 @@ namespace CassioXD
         {
             if (!Orbwalking.CanMove(40)) return;
 
-            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
-            var rangedMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
-            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
-            var rangedMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).ToList();
+            var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).ToList();
+            var allMinionsQnopsn = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) <= (Game.Time + Q.Delay)).ToList();
+            var rangedMinionsQnopsn = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) <= (Game.Time + Q.Delay)).ToList();
+            var allMinionsWnopsn = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) <= (Game.Time + W.Delay)).ToList();
+            var rangedMinionsWnopsn = MinionManager.GetMinions(Player.ServerPosition, W.Range + W.Width, MinionTypes.Ranged, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(x) <= (Game.Time + W.Delay)).ToList();
 
             var Qlaneclear = Option.Item("Qlaneclear").GetValue<bool>();
             var Wlaneclear = Option.Item("Wlaneclear").GetValue<bool>();
             var LaneClearMana = Option.Item("LaneClearMana").GetValue<Slider>().Value;
 
-            if (allMinionsQ.Count() > 0)
+            if (allMinionsQnopsn.Count() == allMinionsQ.Count())
                 Nopsntarget = true;
             else
                 Nopsntarget = false;
 
-            if (Q.IsReady() && Qlaneclear)
+            if (Q.IsReady() && allMinionsQnopsn.Count() == allMinionsQ.Count() && Qlaneclear)
             {
-                var FLr = Q.GetCircularFarmLocation(rangedMinionsQ, Q.Width);
-                var FLa = Q.GetCircularFarmLocation(allMinionsQ, Q.Width);
+                var FLr = Q.GetCircularFarmLocation(rangedMinionsQnopsn, Q.Width);
+                var FLa = Q.GetCircularFarmLocation(allMinionsQnopsn, Q.Width);
 
                 if (FLr.MinionsHit >= 3 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
                 {
@@ -500,17 +502,17 @@ namespace CassioXD
                     return;
                 }
                 else
-                    if (FLa.MinionsHit >= 2 || allMinionsQ.Count() == 1 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
+                    if (FLa.MinionsHit >= 2 || allMinionsQnopsn.Count() == 1 && Player.Distance(FLr.Position) < (Q.Range + Q.Width))
                     {
                         Q.Cast(FLa.Position);
                         return;
                     }
             }
 
-            if (W.IsReady() && Wlaneclear && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
+            if (W.IsReady() && allMinionsWnopsn.Count() == allMinionsW.Count() && Wlaneclear && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
             {
-                var FLr = W.GetCircularFarmLocation(rangedMinionsW, W.Width);
-                var FLa = W.GetCircularFarmLocation(allMinionsW, W.Width);
+                var FLr = W.GetCircularFarmLocation(rangedMinionsWnopsn, W.Width);
+                var FLa = W.GetCircularFarmLocation(allMinionsWnopsn, W.Width);
 
                 if (FLr.MinionsHit >= 3 && Player.Distance(FLr.Position) < (W.Range + W.Width))
                 {
@@ -518,7 +520,7 @@ namespace CassioXD
                     return;
                 }
                 else
-                    if (FLa.MinionsHit >= 2 || allMinionsW.Count() == 1 && Player.Distance(FLr.Position) < (W.Range + W.Width))
+                    if (FLa.MinionsHit >= 2 || allMinionsWnopsn.Count() == 1 && Player.Distance(FLr.Position) < (W.Range + W.Width))
                     {
                         W.Cast(FLa.Position);
                         return;
@@ -544,15 +546,31 @@ namespace CassioXD
 
         }
 
+        public static void LaneFreeze()
+        {
+            if (!Orbwalking.CanMove(40)) return;
+
+            var allEnemyMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
+
+
+        }
+
         public static void Freeze()
         {
             if (!Orbwalking.CanMove(40)) return;
 
             if (E.IsReady())
             {
-                var MinionList = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health);
+                var MinionListQ = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health);
+                var MinionListE = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health);
+                /*
+                foreach (var minion in MinionListQ.Where(x => x.Health < (Player.GetSpellDamage(x, SpellSlot.Q)/3)))
+                {
+                    if (Q.IsReady() && Player.Distance(minion,true) > Player.AttackRange)
+                        Q.Cast(minion);
+                }*/
 
-                foreach (var minion in MinionList.Where(x => x.HasBuffOfType(BuffType.Poison)))
+                foreach (var minion in MinionListE.Where(x => x.HasBuffOfType(BuffType.Poison)))
                 {
                     var buffEndTime = GetPoisonBuffEndTime(minion);
                     if (buffEndTime > Game.Time + E.Delay)
