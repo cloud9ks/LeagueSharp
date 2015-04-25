@@ -290,7 +290,7 @@ namespace CassioXD
                 //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(100, 0, 100)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
