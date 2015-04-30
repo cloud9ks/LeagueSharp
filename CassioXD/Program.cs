@@ -21,6 +21,7 @@ namespace CassioXD
         public static Spell R;
         private static long dtLastQCast = 0;
         public static List<Obj_AI_Hero> Targets = new List<Obj_AI_Hero>();
+        public static Obj_AI_Hero MainTarget;
         public static TargetingMode TMode = TargetingMode.FastKill;
         public static AimMode AMode = AimMode.Normal;
         public static LaneClearMode LMode = LaneClearMode.Normal;
@@ -74,6 +75,27 @@ namespace CassioXD
             LeagueSharp.Common.CustomEvents.Game.OnGameLoad += onGameLoad;
         }
 
+
+        /*
+        private static float GetManaLeft(Obj_AI_Hero enemy)
+        {
+            return 0;
+        }
+
+        private static float GetHpLeft(Obj_AI_Hero enemy)
+        {
+            int Ecount;
+
+            if (enemy.IsValid && enemy != null)
+            {
+                if (enemy.HasBuffOfType(BuffType.Poison))
+                    Ecount = Convert.ToInt32(GetPoisonBuffEndTime(enemy)/0.5);
+            }
+            return 0;
+        }*/
+
+
+#region Targetlist
         private static double FindPrioForTarget(Obj_AI_Hero enemy, TargetingMode TMode)
         {
             switch (TMode)
@@ -151,59 +173,70 @@ namespace CassioXD
             return buffEndTime;
         }
 
+#endregion
+
+#region Targetselect
+
         private static Obj_AI_Hero GetQTarget()
         {
-
-            foreach (var target in Targets)
-            {
-                if (target != null && target.IsVisible && !target.IsDead)
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+                foreach (var target in Targets)
                 {
-                    if (!target.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(target) < (Game.Time + Q.Delay))
+                    if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                        if (!target.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(target) < (Game.Time + Q.Delay))
                         {
-                            return target;
+                            if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                            {
+                                return target;
+                            }
                         }
                     }
                 }
-            }
+            else
+                return MainTarget;
             return null;
         }
 
         private static Obj_AI_Hero GetWTarget()
         {
-
-            foreach (var target in Targets)
-            {
-                if (target != null && target.IsVisible && !target.IsDead)
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+                foreach (var target in Targets)
                 {
-                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
+                    if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (Player.ServerPosition.Distance(W.GetPrediction(target, true).CastPosition) < W.Range)
+                        if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
                         {
-                            return target;
+                            if (Player.ServerPosition.Distance(W.GetPrediction(target, true).CastPosition) < W.Range)
+                            {
+                                return target;
+                            }
                         }
                     }
                 }
-            }
+            else
+                return MainTarget;
             return null;
         }
 
         private static Obj_AI_Hero GetETarget()
         {
-            foreach (var target in Targets)
-            {
-                if (target != null && target.IsVisible && !target.IsDead)
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+                foreach (var target in Targets)
                 {
-                    if ((target.HasBuffOfType(BuffType.Poison) && GetPoisonBuffEndTime(target) > (Game.Time + E.Delay)) || Player.GetSpellDamage(target, SpellSlot.E) > target.Health)
+                    if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (target.IsValidTarget(E.Range))
+                        if ((target.HasBuffOfType(BuffType.Poison) && GetPoisonBuffEndTime(target) > (Game.Time + E.Delay)) || Player.GetSpellDamage(target, SpellSlot.E) > target.Health)
                         {
-                            return target;
+                            if (target.IsValidTarget(E.Range))
+                            {
+                                return target;
+                            }
                         }
                     }
                 }
-            }
+            else
+                return MainTarget;
             return null;
 
         }
@@ -242,7 +275,9 @@ namespace CassioXD
             return null;
         }
 
+#endregion
 
+#region onGameLoad
         private static void onGameLoad(EventArgs args)
         {
             try
@@ -290,7 +325,7 @@ namespace CassioXD
                 //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(100, 0, 100)));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
@@ -302,7 +337,9 @@ namespace CassioXD
             }
 
         }
+#endregion
 
+#region OnTick
         private static void OnTick(EventArgs args)
         {
 
@@ -348,6 +385,9 @@ namespace CassioXD
                 Console.WriteLine(ex.ToString());
             }
         }
+#endregion
+
+#region BeforeAttack
         static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -379,6 +419,9 @@ namespace CassioXD
                 }
             }
         }
+#endregion
+
+#region Combo
 
         public static void Combo()
         {
@@ -418,6 +461,9 @@ namespace CassioXD
             }
 
         }
+#endregion
+
+#region Harras
 
         public static void Harass()
         {
@@ -445,6 +491,10 @@ namespace CassioXD
             }
         }
 
+#endregion
+
+#region Jungle
+
         public static void JungleClear()
         {
             var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -471,6 +521,9 @@ namespace CassioXD
 
         }
 
+#endregion
+
+#region Farm
         public static void WaveClear()
         {
             if (!Orbwalking.CanMove(40)) return;
@@ -546,6 +599,8 @@ namespace CassioXD
 
         }
 
+#endregion
+
         public static void LaneFreeze()
         {
             if (!Orbwalking.CanMove(40)) return;
@@ -554,6 +609,8 @@ namespace CassioXD
 
 
         }
+
+#region Lasthit
 
         public static void Freeze()
         {
@@ -585,6 +642,8 @@ namespace CassioXD
 
         }
 
+#endregion
+
         static void Game_OnWndProc(WndEventArgs args)
         {
             if (MenuGUI.IsChatOpen)
@@ -597,8 +656,18 @@ namespace CassioXD
                 args.Process = false;
                 CastAssistedUlt();
             }
-        }
 
+            if (args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN)
+            {
+
+            MainTarget =
+                HeroManager.Enemies
+                    .FindAll(hero => hero.IsValidTarget() && hero.Distance(Game.CursorPos, true) < 40000) // 200 * 200
+                    .OrderBy(h => h.Distance(Game.CursorPos, true)).FirstOrDefault();;
+            }
+
+        }
+#region Ultimate
         public static void CastAssistedUlt()
         { 
             var faceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
@@ -621,6 +690,7 @@ namespace CassioXD
 
             return new Tuple<int, List<Obj_AI_Hero>>(GetenemysHit.Count, GetenemysHit);
         }
+#endregion
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
@@ -632,11 +702,16 @@ namespace CassioXD
             dtLastQCast = Environment.TickCount;
         }
 
+#region Draw
+
         private static void OnDraw(EventArgs args)
         {
             var DrawQ = Option.Item("DrawQ").GetValue<bool>();
             try
             {
+                if (MainTarget != null && MainTarget.IsVisible)
+                    Render.Circle.DrawCircle(MainTarget.Position, 100, System.Drawing.Color.Red);
+
                 if (DrawQ)
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Khaki);
             }
@@ -645,6 +720,7 @@ namespace CassioXD
                 Game.PrintChat(ex.ToString());
             }
         }
+#endregion
 
     }
 }
