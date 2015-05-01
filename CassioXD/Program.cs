@@ -325,6 +325,7 @@ namespace CassioXD
                 //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "E Lasthit").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
@@ -614,6 +615,7 @@ namespace CassioXD
 
         public static void Freeze()
         {
+            var elasthit = Option.Item("Qlaneclear").GetValue<bool>();
             if (!Orbwalking.CanMove(40)) return;
 
             if (E.IsReady())
@@ -627,16 +629,16 @@ namespace CassioXD
                         Q.Cast(minion);
                 }*/
 
-                foreach (var minion in MinionListE.Where(x => x.HasBuffOfType(BuffType.Poison)))
+                foreach (var minion in MinionListE.Where(x => Player.GetSpellDamage(x, SpellSlot.E) > x.Health))
                 {
                     var buffEndTime = GetPoisonBuffEndTime(minion);
                     if (buffEndTime > Game.Time + E.Delay)
+
+                    if (minion.HasBuffOfType(BuffType.Poison) || elasthit)
                     {
-                        if (Player.GetSpellDamage(minion, SpellSlot.E) > minion.Health)
-                        {
-                            E.Cast(minion);
-                        }
+                        E.Cast(minion);
                     }
+
                 }
             }
 
