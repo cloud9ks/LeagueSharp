@@ -620,7 +620,7 @@ namespace CassioXD
 
         public static void Freeze()
         {
-            var elasthit = Option.Item("Qlaneclear").GetValue<bool>();
+            var elasthit = Option.Item("Elasthit").GetValue<bool>();
             if (!Orbwalking.CanMove(40)) return;
 
             if (E.IsReady())
