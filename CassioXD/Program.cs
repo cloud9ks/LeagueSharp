@@ -19,7 +19,8 @@ namespace CassioXD
         public static Spell W;
         public static Spell E;
         public static Spell R;
-        private static long dtLastQCast = 0;
+        private static long LastQCast = 0;
+        private static long LastECast = 0;
         public static List<Obj_AI_Hero> Targets = new List<Obj_AI_Hero>();
         public static Obj_AI_Hero MainTarget;
         public static TargetingMode TMode = TargetingMode.FastKill;
@@ -323,9 +324,10 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
                 //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 3)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Elasthit", "E Lasthit").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Elasthit", "E Lasthit no psn").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
@@ -431,8 +433,11 @@ namespace CassioXD
 
             var menuItem2 = Option.Item("Hitchance").GetValue<StringList>();
             Enum.TryParse(menuItem2.SList[menuItem2.SelectedIndex], out Chance);
+            var EDelay = Option.Item("Edelay").GetValue<Slider>().Value;
+
             if (E.IsReady() && GetETarget() != null)
             {
+                if (Environment.TickCount >= LastECast + (EDelay * 100))
                 E.Cast(GetETarget());
             }
 
@@ -448,7 +453,7 @@ namespace CassioXD
                         break;
                 }
             }
-            if (W.IsReady() && (Player.ServerPosition.Distance(W.GetPrediction(GetWTarget(), true).CastPosition) < W.Range) && Environment.TickCount > dtLastQCast + Q.Delay * 1000)
+            if (W.IsReady() && (Player.ServerPosition.Distance(W.GetPrediction(GetWTarget(), true).CastPosition) < W.Range) && Environment.TickCount > LastQCast + Q.Delay * 1000)
             {
                 switch (AMode)
                 {
@@ -563,7 +568,7 @@ namespace CassioXD
                     }
             }
 
-            if (W.IsReady() && allMinionsWnopsn.Count() == allMinionsW.Count() && Wlaneclear && Environment.TickCount > (dtLastQCast + Q.Delay * 1000))
+            if (W.IsReady() && allMinionsWnopsn.Count() == allMinionsW.Count() && Wlaneclear && Environment.TickCount > (LastQCast + Q.Delay * 1000))
             {
                 var FLr = W.GetCircularFarmLocation(rangedMinionsWnopsn, W.Width);
                 var FLa = W.GetCircularFarmLocation(allMinionsWnopsn, W.Width);
@@ -698,7 +703,9 @@ namespace CassioXD
             if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0 && BlockR)
                     args.Process = false;
             if (args.Slot == SpellSlot.Q)
-            dtLastQCast = Environment.TickCount;
+                LastQCast = Environment.TickCount;
+            if (args.Slot == SpellSlot.E)
+                LastECast = Environment.TickCount;
         }
 
 #region Draw
