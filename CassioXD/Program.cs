@@ -437,7 +437,7 @@ namespace CassioXD
 
             if (E.IsReady() && GetETarget() != null)
             {
-                if (Environment.TickCount >= LastECast + (EDelay * 100))
+                if (Environment.TickCount >= LastECast + (EDelay * 1000))
                 E.Cast(GetETarget());
             }
 
