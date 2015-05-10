@@ -324,7 +324,7 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
                 //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 3)));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Elasthit", "E Lasthit no psn").SetValue(true));
@@ -437,7 +437,7 @@ namespace CassioXD
 
             if (E.IsReady() && GetETarget() != null)
             {
-                if (Environment.TickCount >= LastECast + (EDelay * 1000))
+                if (Environment.TickCount >= LastECast + (EDelay * 100))
                 E.Cast(GetETarget());
             }
 
