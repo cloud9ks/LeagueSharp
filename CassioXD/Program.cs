@@ -201,8 +201,6 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetWTarget()
         {
-            var MainTarget = XDSharp.Utils.TargetSelector.MainTarget;
-            var Targets = XDSharp.Utils.TargetSelector.Targets;
             if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
                 foreach (var target in Targets)
                 {
