@@ -180,7 +180,7 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetQTarget()
         {
-            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
                 foreach (var target in Targets)
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
@@ -201,7 +201,9 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetWTarget()
         {
-            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+            var MainTarget = XDSharp.Utils.TargetSelector.MainTarget;
+            var Targets = XDSharp.Utils.TargetSelector.Targets;
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
                 foreach (var target in Targets)
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
@@ -222,7 +224,8 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetETarget()
         {
-            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible)
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || ((!MainTarget.HasBuffOfType(BuffType.Poison) && GetPoisonBuffEndTime(MainTarget) < (Game.Time + E.Delay)) || Player.GetSpellDamage(MainTarget, SpellSlot.E) < MainTarget.Health))
+            {
                 foreach (var target in Targets)
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
@@ -236,10 +239,10 @@ namespace CassioXD
                         }
                     }
                 }
+            }
             else
                 return MainTarget;
             return null;
-
         }
 
         private static Obj_AI_Hero GetRFaceTarget()
