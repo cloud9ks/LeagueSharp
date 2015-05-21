@@ -298,7 +298,7 @@ namespace CassioXD
                 Option.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Option.SubMenu("Orbwalking"));
 
-                Option.AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(XDSharp.Utils.TargetSelector.TargetingMode)))));
+                Option.AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Option.SubMenu("Aiming").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Aiming").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
                 Option.AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
