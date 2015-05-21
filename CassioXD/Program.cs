@@ -298,11 +298,11 @@ namespace CassioXD
 
                 Targetlist(TargetingMode.AutoPriority);
 
-                Q = new Spell(SpellSlot.Q, 850);
+                Q = new Spell(SpellSlot.Q, 850f);
                 Q.SetSkillshot(0.6f, 75f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-                W = new Spell(SpellSlot.W, 850);
-                W.SetSkillshot(0.5f, 90f, 2500, false, SkillshotType.SkillshotCircle);
+                W = new Spell(SpellSlot.W, 850f);
+                W.SetSkillshot(0.2f, 90f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
                 E = new Spell(SpellSlot.E, 700);
                 E.SetTargetted(0.2f, float.MaxValue);
@@ -445,12 +445,12 @@ namespace CassioXD
             if (Q.IsReady() && (Player.ServerPosition.Distance(Q.GetPrediction(GetQTarget(), true).CastPosition) < Q.Range))
             {
                 switch (AMode)
-                { 
+                {
                     case AimMode.HitChance:
                         Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
                         break;
                     case AimMode.Normal:
-                        Q.Cast(GetQTarget(), false, true);
+                        Q.Cast(Q.GetPrediction(GetQTarget(), true).CastPosition);
                         break;
                 }
             }
@@ -462,7 +462,7 @@ namespace CassioXD
                         W.CastIfHitchanceEquals(GetWTarget(), Chance, false);
                         break;
                     case AimMode.Normal:
-                        W.Cast(GetWTarget(), false, true);
+                        W.Cast(Q.GetPrediction(GetWTarget(), true).CastPosition);
                         break;
                 }
             }
@@ -486,15 +486,9 @@ namespace CassioXD
             }
             if (Q.IsReady() && (Player.ServerPosition.Distance(Q.GetPrediction(GetQTarget(), true).CastPosition) < Q.Range))
             {
-                switch (AMode)
-                {
-                    case AimMode.HitChance:
-                        Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
-                        break;
-                    case AimMode.Normal:
-                        Q.Cast(GetQTarget(), false, true);
-                        break;
-                }
+
+                Q.CastIfHitchanceEquals(GetQTarget(), HitChance.VeryHigh, false);
+
             }
         }
 
