@@ -294,24 +294,25 @@ namespace CassioXD
                 SpellList.Add(E);
                 SpellList.Add(R);
 
-                Option = new Menu("CassioXD", "CassioXD", true);
-
+                Option = new Menu("XD-Crew", "XD-Crew Cassio", true);
                 Option.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Option.SubMenu("Orbwalking"));
 
-                Option.AddSubMenu(new Menu("Zucht", "Zucht"));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("Elasthit", "E Lasthit no psn").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
-                Option.SubMenu("Zucht").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
+                Option.AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(XDSharp.Utils.TargetSelector.TargetingMode)))));
+                Option.SubMenu("Aiming").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
+                Option.SubMenu("Aiming").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
+                Option.AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
+                Option.SubMenu("Farming").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
+                Option.SubMenu("Farming").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
+                Option.SubMenu("Farming").AddItem(new MenuItem("Elasthit", "E Lasthit no psn").SetValue(true));
+                Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(false));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUltF", "AutoUlt facing").SetValue(new Slider(3, 0, 5)));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUltnF", "AutoUlt not facing").SetValue(new Slider(5, 0, 5)));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
+                Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
+                Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
                 Option.AddToMainMenu();
             }
             catch (Exception ex)
@@ -330,6 +331,11 @@ namespace CassioXD
             {
                 var menuItem = Option.Item("TargetingMode").GetValue<StringList>();
                 Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out TMode);
+
+                var AutoUlt = Option.Item("AutoUlt").GetValue<bool>();
+
+                if (AutoUlt)
+                    CastAutoUltimate();
                 
                 switch (Orbwalker.ActiveMode)
                 {
@@ -651,6 +657,26 @@ namespace CassioXD
                 {
                     R.Cast(R.GetPrediction(GetRTarget(), true).CastPosition);
                 }
+        }
+
+        public static void CastAutoUltimate()
+        {
+            var faceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+
+            var AutoUltF = Option.Item("AutoUltF").GetValue<Slider>().Value;
+            var AutoUltnF = Option.Item("AutoUltnF").GetValue<Slider>().Value;
+
+            if (faceEnemy.Count() >= AutoUltF && GetRFaceTarget() != null)
+            {
+                R.Cast(R.GetPrediction(GetRFaceTarget(), true).CastPosition);
+            }
+            else
+                if (Enemy.Count >= AutoUltnF && GetRTarget() != null)
+                {
+                    R.Cast(R.GetPrediction(GetRTarget(), true).CastPosition);
+                }
+
         }
 
         public static Tuple<int, List<Obj_AI_Hero>> GetHits(Spell spell)
