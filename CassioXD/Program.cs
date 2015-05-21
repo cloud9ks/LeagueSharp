@@ -77,25 +77,6 @@ namespace CassioXD
         }
 
 
-        /*
-        private static float GetManaLeft(Obj_AI_Hero enemy)
-        {
-            return 0;
-        }
-
-        private static float GetHpLeft(Obj_AI_Hero enemy)
-        {
-            int Ecount;
-
-            if (enemy.IsValid && enemy != null)
-            {
-                if (enemy.HasBuffOfType(BuffType.Poison))
-                    Ecount = Convert.ToInt32(GetPoisonBuffEndTime(enemy)/0.5);
-            }
-            return 0;
-        }*/
-
-
 #region Targetlist
         private static double FindPrioForTarget(Obj_AI_Hero enemy, TargetingMode TMode)
         {
@@ -287,8 +268,6 @@ namespace CassioXD
                 Player = ObjectManager.Player;
                 if (Player.BaseSkinName != ChampionName) return;
 
-                Game.PrintChat("CassioXD");
-
                 Game.OnUpdate += OnTick;
                 Drawing.OnDraw += OnDraw;
                 Spellbook.OnCastSpell += Spellbook_OnCastSpell;
@@ -324,7 +303,6 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-                //Option.SubMenu("Zucht").AddItem(new MenuItem("LaneMode", "Lane Clear Mode").SetValue(new StringList(Enum.GetNames(typeof(LaneClearMode)))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
@@ -333,6 +311,7 @@ namespace CassioXD
                 Option.SubMenu("Zucht").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Zucht").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
+                Option.SubMenu("Zucht").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
                 Option.AddToMainMenu();
             }
             catch (Exception ex)
@@ -602,15 +581,6 @@ namespace CassioXD
 
 #endregion
 
-        public static void LaneFreeze()
-        {
-            if (!Orbwalking.CanMove(40)) return;
-
-            var allEnemyMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => !x.HasBuffOfType(BuffType.Poison)).ToList();
-
-
-        }
-
 #region Lasthit
 
         public static void Freeze()
@@ -708,8 +678,20 @@ namespace CassioXD
         private static void OnDraw(EventArgs args)
         {
             var DrawQ = Option.Item("DrawQ").GetValue<bool>();
+            var DrawP = Option.Item("DrawP").GetValue<bool>();
             try
             {
+                if (DrawP)
+                {
+                    foreach (var enemy in Targets)
+                    {
+                        if (enemy.IsVisible && !enemy.IsDead)
+                        {
+                            Render.Circle.DrawCircle(Q.GetPrediction(enemy, true).CastPosition, Q.Width, System.Drawing.Color.Green);
+                        }
+                    }
+                }
+
                 if (MainTarget != null && MainTarget.IsVisible)
                     Render.Circle.DrawCircle(MainTarget.Position, 100, System.Drawing.Color.Red);
 
