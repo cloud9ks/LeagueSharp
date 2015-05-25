@@ -281,7 +281,7 @@ namespace CassioXD
                 Q.SetSkillshot(0.6f, 75f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
                 W = new Spell(SpellSlot.W, 850f);
-                W.SetSkillshot(0.2f, 90f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+                W.SetSkillshot(0.5f, 90f, 2500f, false, SkillshotType.SkillshotCircle);
 
                 E = new Spell(SpellSlot.E, 700);
                 E.SetTargetted(0.2f, float.MaxValue);
@@ -304,7 +304,7 @@ namespace CassioXD
                 Option.AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
-                Option.SubMenu("Farming").AddItem(new MenuItem("Elasthit", "E Lasthit no psn").SetValue(true));
+                Option.SubMenu("Farming").AddItem(new MenuItem("Elasthit", "E Lasthit non psn").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(false));
