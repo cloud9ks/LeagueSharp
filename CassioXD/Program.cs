@@ -276,7 +276,7 @@ namespace CassioXD
                 Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
 
                 Targetlist(TargetingMode.AutoPriority);
-
+                /*
                 Q = new Spell(SpellSlot.Q, 850f);
                 Q.SetSkillshot(0.6f, 75f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
@@ -287,6 +287,18 @@ namespace CassioXD
                 E.SetTargetted(0.2f, float.MaxValue);
 
                 R = new Spell(SpellSlot.R, 800);
+                R.SetSkillshot(0.3f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
+                */
+                Q = new Spell(SpellSlot.Q, 850f);
+                Q.SetSkillshot(0.75f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
+
+                W = new Spell(SpellSlot.W, 850f);
+                W.SetSkillshot(0.5f, W.Instance.SData.CastRadius, W.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotCircle);
+
+                E = new Spell(SpellSlot.E, 700f);
+                E.SetTargetted(0.2f, float.MaxValue);
+
+                R = new Spell(SpellSlot.R, 825f);
                 R.SetSkillshot(0.3f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
 
                 SpellList.Add(Q);
