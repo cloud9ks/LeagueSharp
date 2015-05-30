@@ -47,7 +47,7 @@ namespace CassioXD
                 "Zilean" };
 
         private static string[] p4 = new string[] { "Ahri", "Anivia", "Annie", "Ashe", "Brand", "Caitlyn", "Cassiopeia", "Corki", "Draven",
-                "Ezreal", "Graves", "Jinx", "Karma", "Karthus", "Katarina", "Kennen", "KogMaw", "LeBlanc", "Lucian",
+                "Ezreal", "Ekko", "Graves", "Jinx", "Karma", "Karthus", "Katarina", "Kennen", "KogMaw", "LeBlanc", "Lucian",
                 "Lux", "Malzahar", "MasterYi", "MissFortune", "Orianna", "Quinn", "Sivir", "Syndra", "Talon", "Teemo",
                 "Tristana", "TwistedFate", "Twitch", "Varus", "Vayne", "Veigar", "VelKoz", "Viktor", "Xerath", "Zed",
                 "Ziggs" };
@@ -325,7 +325,15 @@ namespace CassioXD
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
+                Option.SubMenu(new MenuItem("MutePlayers", "Mute all Enemys onGameLoad").SetValue(true));
                 Option.AddToMainMenu();
+
+                var MutePlayers = Option.Item("MutePlayers").GetValue<bool>();
+
+                if (MutePlayers)
+                    MuteEnemy();
+
+
             }
             catch (Exception ex)
             {
@@ -709,6 +717,14 @@ namespace CassioXD
                 LastQCast = Environment.TickCount;
             if (args.Slot == SpellSlot.E)
                 LastECast = Environment.TickCount;
+        }
+
+        static void MuteEnemy()
+        {
+            foreach (var enemy in Tragets)
+        {
+            Game.Say("/Mute " + enemy.Name);
+        }
         }
 
 #region Draw
