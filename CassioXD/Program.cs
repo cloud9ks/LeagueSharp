@@ -325,7 +325,7 @@ namespace CassioXD
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
-                Option.SubMenu(new MenuItem("MutePlayers", "Mute all Enemys onGameLoad").SetValue(true));
+                Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(true));
                 Option.AddToMainMenu();
 
                 var MutePlayers = Option.Item("MutePlayers").GetValue<bool>();
@@ -721,7 +721,7 @@ namespace CassioXD
 
         static void MuteEnemy()
         {
-            foreach (var enemy in Tragets)
+            foreach (var enemy in Targets)
         {
             Game.Say("/Mute " + enemy.Name);
         }
