@@ -85,7 +85,7 @@ namespace CassioXD
             float value = 0f;
             if (Hero.IsFacing(Player))
             {
-                value = (100f - Hero.BoundingRadius);
+                value = (50f - Hero.BoundingRadius);
             }
             else
             {
