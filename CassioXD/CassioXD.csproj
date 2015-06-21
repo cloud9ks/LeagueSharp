@@ -41,16 +41,19 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>..\..\..\..\Desktop\LeagueSharp\System\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp">
-	<SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Users\BaFuSs\Desktop\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-	<SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Users\BaFuSs\Desktop\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-	<SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Users\BaFuSs\Desktop\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />

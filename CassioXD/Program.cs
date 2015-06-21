@@ -5,6 +5,9 @@ using System.Reflection;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using ClipperLib;
+using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
+using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 
 namespace CassioXD
 {
@@ -24,7 +27,7 @@ namespace CassioXD
         public static List<Obj_AI_Hero> Targets = new List<Obj_AI_Hero>();
         public static Obj_AI_Hero MainTarget;
         public static TargetingMode TMode = TargetingMode.FastKill;
-        public static AimMode AMode = AimMode.Normal;
+        public static AimMode AMode = AimMode.XDMode;
         public static LaneClearMode LMode = LaneClearMode.Normal;
         public static HitChance Chance = HitChance.VeryHigh;
         public static bool listed = true;
@@ -60,6 +63,7 @@ namespace CassioXD
 
         public enum AimMode
         {
+            XDMode = 2,
             Normal = 1,
             HitChance = 0
         }
@@ -76,6 +80,39 @@ namespace CassioXD
             LeagueSharp.Common.CustomEvents.Game.OnGameLoad += onGameLoad;
         }
 
+        private static Vector3 PreCastPos (Obj_AI_Hero Hero ,float Delay)
+        {
+            float value = 0f;
+            if (Hero.IsFacing(Player))
+            {
+                value = (100f - Hero.BoundingRadius);
+            }
+            else
+            {
+                value = -(100f - Hero.BoundingRadius);
+            }
+            var distance = Delay * Hero.MoveSpeed + value;
+            var path = Hero.GetWaypoints();
+
+            for (var i = 0; i < path.Count - 1; i++)
+            {
+                var a = path[i];
+                var b = path[i + 1];
+                var d = a.Distance(b);
+
+                if (d < distance)
+                {
+                    distance -= d;
+                }
+                else
+                {
+                    return (a + distance * (b - a).Normalized()).To3D();
+                }
+            }
+
+
+            return (path[path.Count - 1]).To3D();
+        }
 
 #region Targetlist
         private static double FindPrioForTarget(Obj_AI_Hero enemy, TargetingMode TMode)
@@ -161,20 +198,42 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetQTarget()
         {
+            var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
+            Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
+
             if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
+            {
                 foreach (var target in Targets)
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
                     {
                         if (!target.HasBuffOfType(BuffType.Poison) || GetPoisonBuffEndTime(target) < (Game.Time + Q.Delay))
                         {
-                            if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                            switch (AMode)
                             {
-                                return target;
+                                case AimMode.HitChance:
+                                    if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                    {
+                                        return target;
+                                    }
+                                    break;
+                                case AimMode.Normal:
+                                    if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                    {
+                                        return target;
+                                    }
+                                    break;
+                                case AimMode.XDMode:
+                                    if (Player.ServerPosition.Distance(PreCastPos(target, 0.6f)) < Q.Range)
+                                    {
+                                        return target;
+                                    }
+                                    break;
                             }
                         }
                     }
                 }
+            }
             else
                 return MainTarget;
             return null;
@@ -182,16 +241,44 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetWTarget()
         {
+            var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
+            Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
+
             if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
+            {
                 foreach (var target in Targets)
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
-                        {
-                            if (Player.ServerPosition.Distance(W.GetPrediction(target, true).CastPosition) < W.Range)
+                            switch (AMode)
                             {
-                                return target;
+                                case AimMode.HitChance:
+                                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
+                                    {
+                                        if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                        {
+                                            return target;
+                                        }
+                                    }
+                                    break;
+                                case AimMode.Normal:
+                                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
+                                    {
+                                        if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                        {
+                                            return target;
+                                        }
+                                    }
+                                    break;
+                                case AimMode.XDMode:
+                                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(PreCastPos(target, 0.6f)) < Q.Range))
+                                    {
+                                        if (Player.ServerPosition.Distance(PreCastPos(target, Player.ServerPosition.Distance(target.ServerPosition) / W.Speed)) < W.Range)
+                                        {
+                                            return target;
+                                        }
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -447,7 +534,7 @@ namespace CassioXD
                 E.Cast(GetETarget());
             }
 
-            if (Q.IsReady() && (Player.ServerPosition.Distance(Q.GetPrediction(GetQTarget(), true).CastPosition) < Q.Range))
+            if (Q.IsReady())
             {
                 switch (AMode)
                 {
@@ -457,9 +544,12 @@ namespace CassioXD
                     case AimMode.Normal:
                         Q.Cast(Q.GetPrediction(GetQTarget(), true).CastPosition);
                         break;
+                    case AimMode.XDMode:
+                        Q.Cast(PreCastPos(GetQTarget(), 0.6f));
+                        break;
                 }
             }
-            if (W.IsReady() && (Player.ServerPosition.Distance(W.GetPrediction(GetWTarget(), true).CastPosition) < W.Range) && Environment.TickCount > LastQCast + Q.Delay * 1000)
+            if (W.IsReady() && Environment.TickCount > LastQCast + Q.Delay * 1000)
             {
                 switch (AMode)
                 {
@@ -468,6 +558,9 @@ namespace CassioXD
                         break;
                     case AimMode.Normal:
                         W.Cast(Q.GetPrediction(GetWTarget(), true).CastPosition);
+                        break;
+                    case AimMode.XDMode:
+                        W.Cast(PreCastPos(GetWTarget(), Player.ServerPosition.Distance(GetWTarget().ServerPosition) / W.Speed));
                         break;
                 }
             }
@@ -727,12 +820,95 @@ namespace CassioXD
         }
         }
 
+        internal static Vector2 PositionAfter(Obj_AI_Base unit, float t, float speed = float.MaxValue)
+        {
+            var distance = t * speed;
+            var path = unit.GetWaypoints();
+
+            for (var i = 0; i < path.Count - 1; i++)
+            {
+                var a = path[i];
+                var b = path[i + 1];
+                var d = a.Distance(b);
+
+                if (d < distance)
+                {
+                    distance -= d;
+                }
+                else
+                {
+                    return a + distance * (b - a).Normalized();
+                }
+            }
+
+
+            return path[path.Count - 1];
+        }
+
+
+        private static Paths WPPolygon(Obj_AI_Hero Hero)
+        {
+            List<Vector2Time> HeroPath = Hero.GetWaypointsWithTime();
+            Vector2 myPath;
+            Paths WPPaths = new Paths();
+            for (var i = 0; i < HeroPath.Count() - 1; i++)
+            {
+                if (HeroPath.ElementAt<Vector2Time>(i + 1).Time <= 0.6f)
+                {
+                    Geometry.Polygon.Rectangle WPRectangle = new Geometry.Polygon.Rectangle(HeroPath.ElementAt<Vector2Time>(i).Position, HeroPath.ElementAt<Vector2Time>(i + 1).Position, Hero.BoundingRadius);
+                    Geometry.Polygon.Circle Box = new Geometry.Polygon.Circle(HeroPath.ElementAt<Vector2Time>(i).Position, Hero.BoundingRadius);
+                    WPPaths.Add(Box.ToClipperPath());
+                    WPPaths.Add(WPRectangle.ToClipperPath());
+                }
+                else
+                {
+                    myPath = PositionAfter(Hero, 0.6f, Hero.MoveSpeed);
+                    Geometry.Polygon.Rectangle WPRectangle = new Geometry.Polygon.Rectangle(HeroPath.ElementAt<Vector2Time>(i).Position, myPath, Hero.BoundingRadius);
+                    Geometry.Polygon.Circle Box = new Geometry.Polygon.Circle(myPath, Hero.BoundingRadius);
+                    WPPaths.Add(Box.ToClipperPath());
+                    WPPaths.Add(WPRectangle.ToClipperPath());
+                    break;
+                }
+            }
+            Geometry.Polygon.Circle WPFirstBox = new Geometry.Polygon.Circle(HeroPath.First<Vector2Time>().Position, Hero.BoundingRadius);
+            WPPaths.Add(WPFirstBox.ToClipperPath());
+            return WPPaths;
+        }
+
+        private static void InterceptionQ(Obj_AI_Hero Enemy)
+        {
+            Geometry.Polygon.Circle Qspellpoly = new Geometry.Polygon.Circle(PreCastPos(Enemy, 0.6f), 130f);
+
+            Paths subjs = new Paths();
+            foreach (var bla in WPPolygon(Enemy).ToPolygons())
+            {
+                subjs.Add(bla.ToClipperPath());
+            }
+
+            Paths clips = new Paths(1);
+            clips.Add(Qspellpoly.ToClipperPath());
+
+            Paths solution = new Paths();
+            Clipper c = new Clipper();
+            c.AddPaths(subjs, PolyType.ptSubject, true);
+            c.AddPaths(clips, PolyType.ptClip, true);
+            c.Execute(ClipType.ctIntersection, solution);
+
+            foreach (var bli in solution.ToPolygons())
+            {
+                bli.Draw(System.Drawing.Color.Blue);
+            }
+        }
+
+
 #region Draw
 
         private static void OnDraw(EventArgs args)
         {
             var DrawQ = Option.Item("DrawQ").GetValue<bool>();
             var DrawP = Option.Item("DrawP").GetValue<bool>();
+            var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
+            Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
             try
             {
                 if (DrawP)
@@ -741,7 +917,23 @@ namespace CassioXD
                     {
                         if (enemy.IsVisible && !enemy.IsDead)
                         {
-                            Render.Circle.DrawCircle(Q.GetPrediction(enemy, true).CastPosition, Q.Width, System.Drawing.Color.Green);
+                            switch (AMode)
+                            {
+                                case AimMode.HitChance:
+                                    Render.Circle.DrawCircle(Q.GetPrediction(enemy, true).CastPosition, Q.Width, System.Drawing.Color.Green);
+                                    break;
+                                case AimMode.Normal:
+                                    Render.Circle.DrawCircle(Q.GetPrediction(enemy, true).CastPosition, Q.Width, System.Drawing.Color.Green);
+                                    break;
+                                case AimMode.XDMode:
+                                    Render.Circle.DrawCircle(PreCastPos(enemy, 0.6f), Q.Width, System.Drawing.Color.Green);
+                                    break;
+                            }
+                            foreach (var Poly in WPPolygon(enemy).ToPolygons())
+                            {
+                                Poly.Draw(System.Drawing.Color.White);
+                            }
+                            InterceptionQ(enemy);
                         }
                     }
                 }
