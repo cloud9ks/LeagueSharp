@@ -14,7 +14,7 @@ namespace XDSharp.Champions.Karthus
 {
     class Main
     {
-        public static Obj_AI_Hero MainTarget = XDSharp.Utils.TargetSelector.MainTarget;
+        public static Obj_AI_Hero MainTarget;
         public static List<Obj_AI_Hero> Targets = XDSharp.Utils.TargetSelector.Targets;
         public static Menu Option;
         public static Orbwalking.Orbwalker Orbwalker;
@@ -157,7 +157,7 @@ namespace XDSharp.Champions.Karthus
             Option.SubMenu("Combo").AddItem(new MenuItem("WCombo", "W Combo").SetValue(true));
             Option.SubMenu("Combo").AddItem(new MenuItem("ECombo", "E Combo").SetValue(true));
             //Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
-            //Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(true));
+            Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "DrawR").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));

@@ -12,7 +12,6 @@ namespace XDSharp.Utils
     class TargetSelector
     {
         public static List<Obj_AI_Hero> Targets = new List<Obj_AI_Hero>();
-        public static Obj_AI_Hero MainTarget;
         public static TargetingMode TMode = TargetingMode.FastKill;
 
         private static string[] p1 = new string[] { "Alistar", "Amumu", "Bard", "Blitzcrank", "Braum", "Cho'Gath", "Dr. Mundo", "Garen", "Gnar",

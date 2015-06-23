@@ -35,11 +35,11 @@ namespace XDSharp
                     case "LeeSin":
                         new XDSharp.Champions.LeeSin.Main().OGLoad();
                         break;
-                     case "Ekko":
-                        new XDSharp.Champions.Ekko.Main().OGLoad();
-                        break;
                     case "Blitzcrank":
                         new XDSharp.Champions.Blitzcrank.Main().OGLoad();
+                        break;
+                    case "Ekko":
+                        new XDSharp.Champions.Ekko.Main().OGLoad();
                         break;*/
                     case "Karthus":
                         new XDSharp.Champions.Karthus.Main().OGLoad();
