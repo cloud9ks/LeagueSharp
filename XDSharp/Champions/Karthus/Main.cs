@@ -337,7 +337,34 @@ namespace XDSharp.Champions.Karthus
 #region Farm
         public static void WaveClear()
         {
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health);
 
+            if (!mobs.Any())
+                return;
+
+            var mob = mobs.First();
+
+            if (Q.IsReady() && mob.IsValidTarget(Q.Range))
+            {
+                Q.Cast(mob.ServerPosition);
+            }
+            /*
+            if (E.IsReady())
+            {
+                if (mob.IsValidTarget(E.Range) && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).ToggleState == 1)
+                {
+                    E.Cast();
+                }
+                else
+                {
+                    if (!mob.IsValidTarget(E.Range) && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).ToggleState == 2)
+                    {
+                        E.Cast();
+                    }
+                }
+            }
+
+            /*
             var allMinionQ1 = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => x.Health <= Player.GetSpellDamage(x, SpellSlot.Q)).ToList();
             var allMinionQ2 = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width, MinionTypes.All, MinionTeam.Enemy).Where(x => x.Health <= (Player.GetSpellDamage(x, SpellSlot.Q) * 2)).ToList();
             if (!Orbwalking.CanMove(40)) return;
@@ -362,7 +389,7 @@ namespace XDSharp.Champions.Karthus
                         Q.Cast(FLQ1.Position);
                         return;
                     }
-            }
+            }*/
 
         }
 
