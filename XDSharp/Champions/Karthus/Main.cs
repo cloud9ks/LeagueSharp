@@ -157,7 +157,7 @@ namespace XDSharp.Champions.Karthus
             Option.SubMenu("Combo").AddItem(new MenuItem("WCombo", "W Combo").SetValue(true));
             Option.SubMenu("Combo").AddItem(new MenuItem("ECombo", "E Combo").SetValue(true));
             //Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
-            Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(true));
+            //Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "DrawR").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
