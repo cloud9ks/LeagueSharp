@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
-using LeagueSharp.SDK;
 using SharpDX;
 using ClipperLib;
 using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
