@@ -51,7 +51,7 @@ namespace XDSharp.Champions.Karthus
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (Player.ServerPosition.Distance(PreCastPos(target, 0.625f, Q.Width)) < Q.Range)
+                        if (Player.ServerPosition.Distance(PreCastPos(target, 0.725f, Q.Width)) < Q.Range)
                         {
                             return target;
                         }
@@ -130,7 +130,7 @@ namespace XDSharp.Champions.Karthus
             XDSharp.Utils.TargetSelector.Targetlist(XDSharp.Utils.TargetSelector.TargetingMode.AutoPriority);
 
             Q = new Spell(SpellSlot.Q, 875f);
-            Q.SetSkillshot(0.625f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.725f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             W = new Spell(SpellSlot.W, 1000f);
             W.SetSkillshot(0.5f, W.Instance.SData.CastRadius, W.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotCircle);
@@ -246,7 +246,7 @@ namespace XDSharp.Champions.Karthus
                         Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
                         break;
                     case AimMode.Normal:
-                        Q.Cast(PreCastPos(GetQTarget(), 0.625f, Q.Width));
+                        Q.Cast(PreCastPos(GetQTarget(), 0.725f, Q.Width));
                         break;
                 }
             }
@@ -294,7 +294,7 @@ namespace XDSharp.Champions.Karthus
 
             if (Q.IsReady())
             {
-                Q.Cast(PreCastPos(GetQTarget(), 0.625f, Q.Width));
+                Q.Cast(PreCastPos(GetQTarget(), 0.725f, Q.Width));
             }
         }
 
@@ -551,9 +551,9 @@ namespace XDSharp.Champions.Karthus
                     {
                         if (enemy.IsVisible && !enemy.IsDead)
                         {
-                            Render.Circle.DrawCircle(PreCastPos(enemy, 0.625f, Q.Width), Q.Width, System.Drawing.Color.Green);
+                            Render.Circle.DrawCircle(PreCastPos(enemy, 0.725f, Q.Width), Q.Width, System.Drawing.Color.Green);
 
-                            foreach (var bla in WPPolygon(enemy,0.625f).ToPolygons())
+                            foreach (var bla in WPPolygon(enemy,0.725f).ToPolygons())
                             {
                                 bla.Draw(System.Drawing.Color.White);
                             }
