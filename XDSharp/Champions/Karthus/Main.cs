@@ -17,6 +17,9 @@ namespace XDSharp.Champions.Karthus
         public static Obj_AI_Hero MainTarget;
         public static List<Obj_AI_Hero> Targets = XDSharp.Utils.TargetSelector.Targets;
         public static Menu Option;
+        public static float varRange = 50f;
+        public static Single QsDelay = 0.625f;
+        public static Vector3 LastQCastpos;
         public static Orbwalking.Orbwalker Orbwalker;
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -24,7 +27,6 @@ namespace XDSharp.Champions.Karthus
         public static Spell E;
         public static Spell R;
         public static bool Ecasted = false;
-        //public static float Range = 100f;
         public static AimMode AMode = AimMode.Normal;
         public static HitChance Chance = HitChance.VeryHigh;
         public static bool listed = true;
@@ -51,7 +53,7 @@ namespace XDSharp.Champions.Karthus
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (Player.ServerPosition.Distance(PreCastPos(target, 0.725f, Q.Width)) < Q.Range)
+                        if (Player.ServerPosition.Distance(PreCastPos(target, (QsDelay / 1000), Q.Width, varRange)) < Q.Range)
                         {
                             return target;
                         }
@@ -71,7 +73,7 @@ namespace XDSharp.Champions.Karthus
                 {
                     if (target != null && target.IsVisible && !target.IsDead)
                     {
-                        if (Player.ServerPosition.Distance(PreCastPos(target, 0.0f, 1)) < W.Range)
+                        if (Player.ServerPosition.Distance(PreCastPos(target, 0.0f, 1, 0)) < W.Range)
                         {
                             return target;
                         }
@@ -130,7 +132,7 @@ namespace XDSharp.Champions.Karthus
             XDSharp.Utils.TargetSelector.Targetlist(XDSharp.Utils.TargetSelector.TargetingMode.AutoPriority);
 
             Q = new Spell(SpellSlot.Q, 875f);
-            Q.SetSkillshot(0.725f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.625f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             W = new Spell(SpellSlot.W, 1000f);
             W.SetSkillshot(0.5f, W.Instance.SData.CastRadius, W.Instance.SData.MissileSpeed, false, SkillshotType.SkillshotCircle);
@@ -161,6 +163,9 @@ namespace XDSharp.Champions.Karthus
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "DrawR").SetValue(true));
             Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
+
+            Option.SubMenu("Advanced").AddItem(new MenuItem("QsvarRange", "Q Spell value").SetValue(new Slider((int)Q.Instance.SData.CastRadius, (int)Q.Instance.SData.CastRadius*-1, (int)Q.Instance.SData.CastRadius)));
+            Option.SubMenu("Advanced").AddItem(new MenuItem("QsDelay", "Q Spell Delay").SetValue(new Slider(625, 0, 1000)));
             Option.AddToMainMenu();
 
         }
@@ -177,6 +182,8 @@ namespace XDSharp.Champions.Karthus
 
 
                 var AutoUlt = Option.Item("AutoUlt").GetValue<bool>();
+
+               // Q.SetSkillshot(QsDelay, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
 
                 switch (Orbwalker.ActiveMode)
@@ -246,7 +253,7 @@ namespace XDSharp.Champions.Karthus
                         Q.CastIfHitchanceEquals(GetQTarget(), Chance, false);
                         break;
                     case AimMode.Normal:
-                        Q.Cast(PreCastPos(GetQTarget(), 0.725f, Q.Width));
+                        Q.Cast(PreCastPos(GetQTarget(), (QsDelay / 1000), Q.Width, varRange));
                         break;
                 }
             }
@@ -259,7 +266,7 @@ namespace XDSharp.Champions.Karthus
                         W.CastIfHitchanceEquals(GetWTarget(), Chance, false);
                         break;
                     case AimMode.Normal:
-                        W.Cast(PreCastPos(GetWTarget(), 0.1f, 0));
+                        W.Cast(PreCastPos(GetWTarget(), 0.1f, 0 , 0));
                         break;
                 }
             }
@@ -294,7 +301,7 @@ namespace XDSharp.Champions.Karthus
 
             if (Q.IsReady())
             {
-                Q.Cast(PreCastPos(GetQTarget(), 0.725f, Q.Width));
+                Q.Cast(PreCastPos(GetQTarget(), (QsDelay / 1000), Q.Width, varRange));
             }
         }
 
@@ -472,16 +479,16 @@ namespace XDSharp.Champions.Karthus
             return path[path.Count - 1];
         }
 
-        public static Vector3 PreCastPos(Obj_AI_Hero Hero, float Delay, float Range)
+        public static Vector3 PreCastPos(Obj_AI_Hero Hero, float Delay, float Range, float varRange)
         {
             float value = 0f;
             if (Hero.IsFacing(Player))
             {
-                value = (50f - Hero.BoundingRadius);
+                value = (Range - varRange - Hero.BoundingRadius);
             }
             else
             {
-                value = -(Range - 10f - Hero.BoundingRadius);
+                value = (Range - varRange - Hero.BoundingRadius);
             }
             var distance = Delay * Hero.MoveSpeed + value;
             var path = Hero.GetWaypoints();
@@ -535,15 +542,15 @@ namespace XDSharp.Champions.Karthus
             return WPPaths;
         }
 
-        public static void Interceptiontest(Obj_AI_Hero Enemy, float delay, float Range)
+        public static void Interceptiontest(Obj_AI_Hero Enemy, float delay, float Range, float varRange)
         {
-            Geometry.Polygon.Circle Qspellpoly = new Geometry.Polygon.Circle(PreCastPos(Enemy, delay, Range), 130f);
+            Geometry.Polygon.Circle Qspellpoly = new Geometry.Polygon.Circle(LastQCastpos, Q.Width);
             Qspellpoly.Draw(System.Drawing.Color.Khaki);
 
             Paths subjs = new Paths();
-            foreach (var bla in WPPolygon(Enemy, delay).ToPolygons())
+            foreach (var Waypoint in WPPolygon(Enemy, delay).ToPolygons())
             {
-                subjs.Add(bla.ToClipperPath());
+                subjs.Add(Waypoint.ToClipperPath());
             }
 
             Paths clips = new Paths(1);
@@ -561,6 +568,11 @@ namespace XDSharp.Champions.Karthus
             }
         }
 
+        static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.Q)
+                LastQCastpos = args.StartPosition;
+        }
 
 #region Draw
 
@@ -569,6 +581,8 @@ namespace XDSharp.Champions.Karthus
             var DrawQ = Option.Item("DrawQ").GetValue<bool>();
             var DrawP = Option.Item("DrawP").GetValue<bool>();
             var DrawR = Option.Item("DrawR").GetValue<bool>();
+            varRange = Option.Item("QsvarRange").GetValue<Slider>().Value;
+            QsDelay = (Option.Item("QsDelay").GetValue<Slider>().Value);
 
             try
             {
@@ -578,14 +592,20 @@ namespace XDSharp.Champions.Karthus
                     {
                         if (enemy.IsVisible && !enemy.IsDead)
                         {
-                            Render.Circle.DrawCircle(PreCastPos(enemy, 0.725f, Q.Width), Q.Width, System.Drawing.Color.Green);
-
-                            foreach (var bla in WPPolygon(enemy,0.725f).ToPolygons())
+                            Render.Circle.DrawCircle(PreCastPos(enemy, (QsDelay / 1000), Q.Width, varRange), Q.Width, System.Drawing.Color.Red);
+                            Render.Circle.DrawCircle(PreCastPos(enemy, 0, Q.Width, varRange), Q.Width, System.Drawing.Color.Green);
+                            foreach (var Waypoint in WPPolygon(enemy, (QsDelay / 1000)).ToPolygons())
                             {
-                                bla.Draw(System.Drawing.Color.White);
+                                Waypoint.Draw(System.Drawing.Color.White);
                             }
                         }
                     }
+                    Drawing.DrawText(100, 210, System.Drawing.Color.White, "Q Delay:" + (QsDelay / 1000).ToString("N3"));
+                    Drawing.DrawText(100, 220, System.Drawing.Color.White, "Q Width:" + Q.Width.ToString());
+                    Drawing.DrawText(100, 230, System.Drawing.Color.Red, "Q Castposition Color");
+                    Drawing.DrawText(100, 240, System.Drawing.Color.Green, "Q Explode Color");
+                    Drawing.DrawText(100, 250, System.Drawing.Color.White, "Enemy Waypoint + Predicted Position Color");
+
                 }
                 if (MainTarget != null && MainTarget.IsVisible)
                 {
@@ -599,7 +619,7 @@ namespace XDSharp.Champions.Karthus
                 if (DrawR && R.IsReady() && GetRTarget() != null)
                 {
                     for (var i = 0; i <= GetRTarget().Count(); i++)
-                        Drawing.DrawText(100, 100 + 10 * i, System.Drawing.Color.White, GetRTarget().ElementAt(i).BaseSkinName);
+                        Drawing.DrawText(100, 100 + 10 * i, System.Drawing.Color.White, GetRTarget().ElementAt(i).CharData.BaseSkinName);
                 }
             }
             catch (Exception ex)
