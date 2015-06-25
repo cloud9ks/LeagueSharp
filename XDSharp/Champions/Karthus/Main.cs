@@ -593,7 +593,7 @@ namespace XDSharp.Champions.Karthus
                         if (enemy.IsVisible && !enemy.IsDead)
                         {
                             Render.Circle.DrawCircle(PreCastPos(enemy, (QsDelay / 1000), Q.Width, varRange), Q.Width, System.Drawing.Color.Red);
-                            Render.Circle.DrawCircle(PreCastPos(enemy, 0, Q.Width, varRange), Q.Width, System.Drawing.Color.Green);
+                            Render.Circle.DrawCircle(PreCastPos(enemy, 0.625f - (QsDelay / 1000), Q.Width, varRange), Q.Width, System.Drawing.Color.Green);
                             foreach (var Waypoint in WPPolygon(enemy, (QsDelay / 1000)).ToPolygons())
                             {
                                 Waypoint.Draw(System.Drawing.Color.White);
