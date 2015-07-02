@@ -313,7 +313,7 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetRFaceTarget()
         {
-            var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+            var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition) && Player.ServerPosition.Distance(enemy.ServerPosition) < R.Range).ToList();
             foreach (var target in Targets)
             {
                 if (target != null && target.IsVisible && !target.IsDead)
@@ -330,7 +330,7 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetRTarget()
         {
-            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
+            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition) && Player.ServerPosition.Distance(enemy.ServerPosition) < R.Range).ToList();
 
             foreach (var target in Targets)
             {
