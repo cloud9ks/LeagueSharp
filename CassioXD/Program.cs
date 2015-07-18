@@ -39,7 +39,7 @@ namespace CassioXD
         private static string[] p1 = new string[] { "Alistar", "Amumu", "Bard", "Blitzcrank", "Braum", "Cho'Gath", "Dr. Mundo", "Garen", "Gnar",
                 "Hecarim", "Janna", "Jarvan IV", "Leona", "Lulu", "Malphite", "Nami", "Nasus", "Nautilus", "Nunu",
                 "Olaf", "Rammus", "Renekton", "Sejuani", "Shen", "Shyvana", "Singed", "Sion", "Skarner", "Sona",
-                "Soraka", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra" };
+                "Soraka", "Taric", "Thresh", "Volibear", "Warwick", "MonkeyKing", "Yorick", "Zac", "Zyra","tahm kench" };
 
         private static string[] p2 = new string[] { "Aatrox", "Darius", "Elise", "Evelynn", "Galio", "Gangplank", "Gragas", "Irelia", "Jax",
                 "Lee Sin", "Maokai", "Morgana", "Nocturne", "Pantheon", "Poppy", "Rengar", "Rumble", "Ryze", "Swain",
@@ -201,7 +201,7 @@ namespace CassioXD
             var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
             Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
 
-            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison) || !(Player.ServerPosition.Distance(Q.GetPrediction(MainTarget, true).CastPosition) < Q.Range))
             {
                 foreach (var target in Targets)
                 {
@@ -244,7 +244,7 @@ namespace CassioXD
             var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
             Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
 
-            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison))
+            if (MainTarget == null || MainTarget.IsDead || !MainTarget.IsVisible || MainTarget.HasBuffOfType(BuffType.Poison) || !(Player.ServerPosition.Distance(W.GetPrediction(MainTarget, true).CastPosition) < W.Range))
             {
                 foreach (var target in Targets)
                 {
@@ -255,7 +255,7 @@ namespace CassioXD
                                 case AimMode.HitChance:
                                     if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
                                     {
-                                        if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                        if (Player.ServerPosition.Distance(W.GetPrediction(target, true).CastPosition) < W.Range)
                                         {
                                             return target;
                                         }
@@ -264,14 +264,14 @@ namespace CassioXD
                                 case AimMode.Normal:
                                     if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) > Q.Range))
                                     {
-                                        if (Player.ServerPosition.Distance(Q.GetPrediction(target, true).CastPosition) < Q.Range)
+                                        if (Player.ServerPosition.Distance(W.GetPrediction(target, true).CastPosition) < Q.Range)
                                         {
                                             return target;
                                         }
                                     }
                                     break;
                                 case AimMode.XDMode:
-                                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(PreCastPos(target, 0.6f)) < Q.Range))
+                                    if (!target.HasBuffOfType(BuffType.Poison) || (Player.ServerPosition.Distance(PreCastPos(target, 0.6f)) > Q.Range))
                                     {
                                         if (Player.ServerPosition.Distance(PreCastPos(target, Player.ServerPosition.Distance(target.ServerPosition) / W.Speed)) < W.Range)
                                         {
@@ -313,7 +313,7 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetRFaceTarget()
         {
-            var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition) && Player.ServerPosition.Distance(enemy.ServerPosition) < R.Range).ToList();
+            var FaceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
             foreach (var target in Targets)
             {
                 if (target != null && target.IsVisible && !target.IsDead)
@@ -330,7 +330,7 @@ namespace CassioXD
 
         private static Obj_AI_Hero GetRTarget()
         {
-            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition) && Player.ServerPosition.Distance(enemy.ServerPosition) < R.Range).ToList();
+            var Enemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
 
             foreach (var target in Targets)
             {
@@ -369,12 +369,6 @@ namespace CassioXD
 
                 W = new Spell(SpellSlot.W, 850f);
                 W.SetSkillshot(0.5f, 90f, 2500f, false, SkillshotType.SkillshotCircle);
-
-                E = new Spell(SpellSlot.E, 700);
-                E.SetTargetted(0.2f, float.MaxValue);
-
-                R = new Spell(SpellSlot.R, 800);
-                R.SetSkillshot(0.3f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
                 */
                 Q = new Spell(SpellSlot.Q, 850f);
                 Q.SetSkillshot(0.75f, Q.Instance.SData.CastRadius, float.MaxValue, false, SkillshotType.SkillshotCircle);
