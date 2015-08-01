@@ -33,6 +33,10 @@ namespace CassioXD
         public static bool listed = true;
         public static bool Nopsntarget = true;
         public static bool aastatus;
+        public static int kills = 0;
+        public static Random rand = new Random();
+
+        public static List<string> Messages;
 
 
 
@@ -74,10 +78,40 @@ namespace CassioXD
             Logical = 0
         }
 
+        static void setupMessages()
+        {
+            Messages = new List<string>
+            {
+                "gj", "good job", "very gj", "very good job",
+                "wp", "well played",
+                "nicely played",
+                "amazing",
+                "nice", "nice1", "nice one",
+                "well done",
+                "sweet",                
+            };
+
+        }
+
+        static string getRandomElement(List<string> collection, bool firstEmpty = true)
+        {
+            if (firstEmpty && rand.Next(3) == 0)
+                return collection[0];
+
+            return collection[rand.Next(collection.Count)];
+        }
+
+        static string generateMessage()
+        {
+            string message = getRandomElement(Messages, false);
+            return message;
+        }
+
 
         static void Main(string[] args)
         {
             LeagueSharp.Common.CustomEvents.Game.OnGameLoad += onGameLoad;
+            setupMessages();
         }
 
         private static Vector3 PreCastPos (Obj_AI_Hero Hero ,float Delay)
@@ -392,9 +426,9 @@ namespace CassioXD
                 Orbwalker = new Orbwalking.Orbwalker(Option.SubMenu("Orbwalking"));
 
                 Option.AddItem(new MenuItem("TargetingMode", "Target Mode").SetValue(new StringList(Enum.GetNames(typeof(TargetingMode)))));
-          /*      Option.SubMenu("Aiming").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
+                Option.SubMenu("Aiming").AddItem(new MenuItem("AimMode", "Aim Mode").SetValue(new StringList(Enum.GetNames(typeof(AimMode)))));
                 Option.SubMenu("Aiming").AddItem(new MenuItem("Hitchance", "Hitchance Mode").SetValue(new StringList(Enum.GetNames(typeof(HitChance)))));
-         */       Option.AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
+                Option.AddItem(new MenuItem("Edelay", "Ecombo delay").SetValue(new Slider(0, 0, 5)));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Elasthit", "E Lasthit non psn").SetValue(true));
@@ -407,6 +441,7 @@ namespace CassioXD
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
                 Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(true));
+                Option.AddItem(new MenuItem("Fun", "Killspam").SetValue(true));
                 Option.AddToMainMenu();
 
                 var MutePlayers = Option.Item("MutePlayers").GetValue<bool>();
@@ -437,6 +472,15 @@ namespace CassioXD
                 
                 if (AutoUlt)
                     CastAutoUltimate();*/
+
+                var Fun = Option.Item("Fun").GetValue<bool>();
+
+                foreach (var enemy in Targets)
+                    if (enemy.IsValid && enemy.IsDead && Player.ChampionsKilled > kills && Fun)
+                    {
+                        kills = Player.ChampionsKilled;
+                        Game.Say("/all " + generateMessage() + " " + enemy.Name);
+                    }
                 
                 switch (Orbwalker.ActiveMode)
                 {
