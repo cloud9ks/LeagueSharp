@@ -33,10 +33,6 @@ namespace CassioXD
         public static bool listed = true;
         public static bool Nopsntarget = true;
         public static bool aastatus;
-        public static int kills = 0;
-        public static Random rand = new Random();
-
-        public static List<string> Messages;
 
 
 
@@ -78,40 +74,10 @@ namespace CassioXD
             Logical = 0
         }
 
-        static void setupMessages()
-        {
-            Messages = new List<string>
-            {
-                "gj", "good job", "very gj", "very good job",
-                "wp", "well played",
-                "nicely played",
-                "amazing",
-                "nice", "nice1", "nice one",
-                "well done",
-                "sweet",                
-            };
-
-        }
-
-        static string getRandomElement(List<string> collection, bool firstEmpty = true)
-        {
-            if (firstEmpty && rand.Next(3) == 0)
-                return collection[0];
-
-            return collection[rand.Next(collection.Count)];
-        }
-
-        static string generateMessage()
-        {
-            string message = getRandomElement(Messages, false);
-            return message;
-        }
-
 
         static void Main(string[] args)
         {
             LeagueSharp.Common.CustomEvents.Game.OnGameLoad += onGameLoad;
-            setupMessages();
         }
 
         private static Vector3 PreCastPos (Obj_AI_Hero Hero ,float Delay)
@@ -441,7 +407,6 @@ namespace CassioXD
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
                 Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(true));
-                Option.AddItem(new MenuItem("Fun", "Killspam").SetValue(true));
                 Option.AddToMainMenu();
 
                 var MutePlayers = Option.Item("MutePlayers").GetValue<bool>();
@@ -472,15 +437,6 @@ namespace CassioXD
                 
                 if (AutoUlt)
                     CastAutoUltimate();*/
-
-                var Fun = Option.Item("Fun").GetValue<bool>();
-
-                foreach (var enemy in Targets)
-                    if (enemy.IsValid && enemy.IsDead && Player.ChampionsKilled > kills && Fun)
-                    {
-                        kills = Player.ChampionsKilled;
-                        Game.Say("/all " + generateMessage() + " " + enemy.Name);
-                    }
                 
                 switch (Orbwalker.ActiveMode)
                 {
