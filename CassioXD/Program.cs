@@ -121,19 +121,19 @@ namespace CassioXD
             {
                 case TargetingMode.AutoPriority:
                     {
-                        if (p1.Contains(enemy.BaseSkinName))
+                        if (p1.Contains(enemy.CharData.BaseSkinName))
                         {
                             return 4;
                         }
-                        else if (p2.Contains(enemy.BaseSkinName))
+                        else if (p2.Contains(enemy.CharData.BaseSkinName))
                         {
                             return 3;
                         }
-                        else if (p3.Contains(enemy.BaseSkinName))
+                        else if (p3.Contains(enemy.CharData.BaseSkinName))
                         {
                             return 2;
                         }
-                        else if (p4.Contains(enemy.BaseSkinName))
+                        else if (p4.Contains(enemy.CharData.BaseSkinName))
                         {
                             return 1;
                         }
@@ -320,7 +320,7 @@ namespace CassioXD
                     foreach (var fenemy in FaceEnemy)
                         if (fenemy != null && fenemy.IsVisible && !fenemy.IsDead)
                         {
-                            if (target.BaseSkinName == fenemy.BaseSkinName)
+                            if (target.CharData.BaseSkinName == fenemy.CharData.BaseSkinName)
                                 return fenemy;
                         }
             }
@@ -338,7 +338,7 @@ namespace CassioXD
                 foreach (var enemy in Enemy)
                     if (enemy != null && enemy.IsVisible && !enemy.IsDead)
                 {
-                    if (target.BaseSkinName == enemy.BaseSkinName)
+                    if (target.CharData.BaseSkinName == enemy.CharData.BaseSkinName)
                         return enemy;
                 }
             }
@@ -353,7 +353,7 @@ namespace CassioXD
             try
             {
                 Player = ObjectManager.Player;
-                if (Player.BaseSkinName != ChampionName) return;
+                if (Player.CharData.BaseSkinName != ChampionName) return;
 
                 Game.OnUpdate += OnTick;
                 Drawing.OnDraw += OnDraw;
@@ -398,12 +398,12 @@ namespace CassioXD
                 Option.SubMenu("Farming").AddItem(new MenuItem("Qlaneclear", "Q Lane Clear").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Wlaneclear", "W Lane Clear").SetValue(true));
                 Option.SubMenu("Farming").AddItem(new MenuItem("Elasthit", "E Lasthit non psn").SetValue(true));
-                Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));
+                Option.SubMenu("Farming").AddItem(new MenuItem("LaneClearMana", "Lane Clear Mana").SetValue(new Slider(70, 0, 100)));/*
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("BlockR", "BlockR").SetValue(true));
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUlt", "AutoUltimate").SetValue(false));
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUltF", "AutoUlt facing").SetValue(new Slider(3, 0, 5)));
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AutoUltnF", "AutoUlt not facing").SetValue(new Slider(5, 0, 5)));
-                Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));
+                Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));*/
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
                 Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(true));
@@ -432,11 +432,11 @@ namespace CassioXD
             {
                 var menuItem = Option.Item("TargetingMode").GetValue<StringList>();
                 Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out TMode);
-
+                /*
                 var AutoUlt = Option.Item("AutoUlt").GetValue<bool>();
-
+                
                 if (AutoUlt)
-                    CastAutoUltimate();
+                    CastAutoUltimate();*/
                 
                 switch (Orbwalker.ActiveMode)
                 {
@@ -529,7 +529,7 @@ namespace CassioXD
             }
 
             if (Q.IsReady())
-            {
+            {/*
                 switch (AMode)
                 {
                     case AimMode.HitChance:
@@ -538,13 +538,13 @@ namespace CassioXD
                     case AimMode.Normal:
                         Q.Cast(Q.GetPrediction(GetQTarget(), true).CastPosition);
                         break;
-                    case AimMode.XDMode:
+                    case AimMode.XDMode:*/
                         Q.Cast(PreCastPos(GetQTarget(), 0.6f));
-                        break;
-                }
+               /*         break;
+                }*/
             }
             if (W.IsReady() && Environment.TickCount > LastQCast + Q.Delay * 1000)
-            {
+            {/*
                 switch (AMode)
                 {
                     case AimMode.HitChance:
@@ -553,10 +553,10 @@ namespace CassioXD
                     case AimMode.Normal:
                         W.Cast(Q.GetPrediction(GetWTarget(), true).CastPosition);
                         break;
-                    case AimMode.XDMode:
+                    case AimMode.XDMode:*/
                         W.Cast(PreCastPos(GetWTarget(), Player.ServerPosition.Distance(GetWTarget().ServerPosition) / W.Speed));
-                        break;
-                }
+              /*          break;
+                }*/
             }
 
         }
@@ -576,12 +576,17 @@ namespace CassioXD
             {
                 E.Cast(GetETarget());
             }
+            if (Q.IsReady())
+            {
+                Q.Cast(PreCastPos(GetQTarget(), 0.6f));
+            }
+            /*
             if (Q.IsReady() && (Player.ServerPosition.Distance(Q.GetPrediction(GetQTarget(), true).CastPosition) < Q.Range))
             {
 
                 Q.CastIfHitchanceEquals(GetQTarget(), HitChance.VeryHigh, false);
 
-            }
+            }*/
         }
 
 #endregion
@@ -730,7 +735,7 @@ namespace CassioXD
         {
             if (MenuGUI.IsChatOpen)
                 return;
-
+            /*
             var AssistedUltKey = Option.Item("AssistedUltKey").GetValue<KeyBind>().Key;
 
             if (args.WParam == AssistedUltKey)
@@ -738,7 +743,7 @@ namespace CassioXD
                 args.Process = false;
                 CastAssistedUlt();
             }
-
+            */
             if (args.Msg == (uint)WindowsMessages.WM_LBUTTONDOWN)
             {
 
@@ -750,6 +755,7 @@ namespace CassioXD
 
         }
 #region Ultimate
+        /*
         public static void CastAssistedUlt()
         { 
             var faceEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsFacing(Player) && R.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
@@ -791,15 +797,15 @@ namespace CassioXD
             var GetenemysHit = ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && spell.WillHit(enemy, R.GetPrediction(enemy, true).CastPosition)).ToList();
 
             return new Tuple<int, List<Obj_AI_Hero>>(GetenemysHit.Count, GetenemysHit);
-        }
+        }*/
 #endregion
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
-        {
+        {/*
             var BlockR = Option.Item("BlockR").GetValue<bool>();
 
             if (args.Slot == SpellSlot.R && GetHits(R).Item1 == 0 && BlockR)
-                    args.Process = false;
+                    args.Process = false;*/
             if (args.Slot == SpellSlot.Q)
                 LastQCast = Environment.TickCount;
             if (args.Slot == SpellSlot.E)
@@ -904,7 +910,7 @@ namespace CassioXD
             var menuItem3 = Option.Item("AimMode").GetValue<StringList>();
             Enum.TryParse(menuItem3.SList[menuItem3.SelectedIndex], out AMode);
             try
-            {
+            {/*
                 if (DrawP)
                 {
                     foreach (var enemy in Targets)
@@ -930,7 +936,7 @@ namespace CassioXD
                             InterceptionQ(enemy);
                         }
                     }
-                }
+                }*/
 
                 if (MainTarget != null && MainTarget.IsVisible)
                     Render.Circle.DrawCircle(MainTarget.Position, 100, System.Drawing.Color.Red);
