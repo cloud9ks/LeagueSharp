@@ -440,8 +440,8 @@ namespace CassioXD
                 Option.SubMenu("Ultimate").AddItem(new MenuItem("AssistedUltKey", "Assisted Ult Key").SetValue((new KeyBind("R".ToCharArray()[0], KeyBindType.Press))));*/
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "DrawQ").SetValue(true));
                 Option.SubMenu("Drawing").AddItem(new MenuItem("DrawP", "Draw Prediction").SetValue(true));
-                Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(true));
-                Option.AddItem(new MenuItem("Fun", "Killspam").SetValue(true));
+                Option.AddItem(new MenuItem("MutePlayers", "Mute all Enemys on Load").SetValue(false));
+                Option.AddItem(new MenuItem("Fun", "Killspam").SetValue(false));
                 Option.AddToMainMenu();
 
                 var MutePlayers = Option.Item("MutePlayers").GetValue<bool>();
